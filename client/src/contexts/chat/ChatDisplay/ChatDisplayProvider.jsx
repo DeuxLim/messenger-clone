@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
-import useChat from "../useChat";
 import useSocket from "../../socket/useSocket";
 import ChatDisplayContext from "./ChatDisplayContext";
 
@@ -8,10 +6,8 @@ export default function ChatDisplayProvider({ children }) {
 	const [typingChats, setTypingChats] = useState({});
 	const [sidebarVisible, setSidebarVisible] = useState(true);
 	const [isDesktop, setIsDesktop] = useState(false);
-	const { setActiveChatData } = useChat();
 	const [isChatSettingsOpen, setIsChatSettingsOpen] = useState(false);
 	const { socket, socketStatus } = useSocket();
-	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (!socket || socketStatus !== "connected") return;
@@ -37,13 +33,15 @@ export default function ChatDisplayProvider({ children }) {
 
 		const updateLayout = (e) => {
 			setIsDesktop(e.matches);
-			setActiveChatData(null);
+			if (!e.matches) {
+				setIsChatSettingsOpen(false);
+			}
 		};
 
 		updateLayout(desktopQuery);
 		desktopQuery.addEventListener("change", updateLayout);
 		return () => desktopQuery.removeEventListener("change", updateLayout);
-	}, [setActiveChatData, navigate]);
+	}, []);
 
 	const data = {
 		typingChats, setTypingChats,

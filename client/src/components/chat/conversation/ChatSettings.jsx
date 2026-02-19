@@ -7,7 +7,7 @@ import CenterPopUpModal from '../../common/CenterPopUpModal';
 import { RiEdit2Fill } from "react-icons/ri";
 import { IoMdArrowBack } from "react-icons/io";
 import { IoMdCheckmark } from "react-icons/io";
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { MdModeEdit } from "react-icons/md";
 import useChat from '../../../contexts/chat/useChat';
 import useAuth from '../../../contexts/auth/useAuth';
@@ -23,7 +23,7 @@ export default function ChatSettings() {
     const [editingParticipantId, setEditingParticipantId] = useState(null);
     const [isChatNameEditModalDisplayed, setIsChatNameEditModalDisplayed] = useToggle();
     const [chatName, setChatName] = useState(activeChatData?.chatName || "");
-    const { isChatSettingsOpen, isDesktop, setIsChatSettingsOpen } = useChatDisplay();
+    const { isChatSettingsOpen, setIsChatSettingsOpen } = useChatDisplay();
     const [updatedNickname, setUpdatedNickname] = useState({});
     const { socket } = useSocket();
 
@@ -86,12 +86,6 @@ export default function ChatSettings() {
     const handleBackClick = () => {
         setIsChatSettingsOpen(false);
     };
-
-    useEffect(() => {
-        if (!isDesktop) {
-            setIsChatSettingsOpen(false);
-        }
-    }, [isDesktop, setIsChatSettingsOpen]);
 
     return (
         <div className={`h-full shadow-sm overflow-hidden bg-white rounded-xl p-2 min-w-80 w-full ${isChatSettingsOpen ? "max-w-[400px]" : ""}`}>
