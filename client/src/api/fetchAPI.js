@@ -2,6 +2,30 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 
 // Global config for auth token
 let authToken = null;
+let refreshPromise = null;
+
+async function refreshAccessToken() {
+	if (!refreshPromise) {
+		refreshPromise = (async () => {
+			const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
+				method: "POST",
+				credentials: "include",
+			});
+
+			if (!refreshRes.ok) throw new Error("Refresh failed");
+
+			const data = await refreshRes.json();
+			if (!data.accessToken) throw new Error("No access token");
+
+			authToken = data.accessToken;
+			return data.accessToken;
+		})().finally(() => {
+			refreshPromise = null;
+		});
+	}
+
+	return refreshPromise;
+}
 
 async function fetchClient(
 	endpoint,
@@ -40,30 +64,20 @@ async function fetchClient(
 		}
 	}
 
-	try {
-		// Add timeout
-		const controller = new AbortController();
-		const timeoutId = setTimeout(() => controller.abort(), timeout);
-		config.signal = controller.signal;
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), timeout);
+	config.signal = controller.signal;
 
+	try {
 		const response = await fetch(`${BASE_URL}${endpoint}`, config);
-		clearTimeout(timeoutId);
+		const isUnauthorized = response.status === 401 || response.status === 403;
+		const canRetryWithRefresh =
+			isUnauthorized && retry && !endpoint.startsWith("/auth/refresh");
 
 		// 🔴 HERE: intercept expired access token
-		if ((response.status === 401 || response.status === 403) && retry) {
+		if (canRetryWithRefresh) {
 			try {
-				const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
-					method: "POST",
-					credentials: "include",
-				});
-
-				if (!refreshRes.ok) throw new Error("Refresh failed");
-
-				const data = await refreshRes.json();
-				if (!data.accessToken) throw new Error("No access token");
-
-				// 🔐 Update global token
-				authToken = data.accessToken;
+				await refreshAccessToken();
 
 				// 🔁 Retry original request once
 				return fetchClient(endpoint, {
@@ -104,6 +118,8 @@ async function fetchClient(
 		}
 		console.error("Fetch error:", error.message);
 		throw error;
+	} finally {
+		clearTimeout(timeoutId);
 	}
 }
 

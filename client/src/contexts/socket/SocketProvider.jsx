@@ -5,7 +5,7 @@ import SocketContext from "./SocketContext";
 import { announceOnline } from "../../realtime/presenceSocket";
 
 export default function SocketProvider({ children }) {
-	const { authStatus, accessToken, currentUser } = useAuth();
+	const { authStatus, token, currentUser } = useAuth();
 	const [socketStatus, setSocketStatus] = useState("idle");
 
 	useEffect(() => {
@@ -18,7 +18,7 @@ export default function SocketProvider({ children }) {
 		setSocketStatus("connecting");
 
 		try {
-			const socket = connectSocket(accessToken);
+			const socket = connectSocket(token);
 
 			socket.on("connect", () => {
 				setSocketStatus("connected");
@@ -37,7 +37,7 @@ export default function SocketProvider({ children }) {
 			disconnectSocket();
 			setSocketStatus("idle");
 		};
-	}, [authStatus, accessToken, currentUser?._id]);
+	}, [authStatus, token, currentUser?._id]);
 
 	return (
 		<SocketContext.Provider value={{ socket: getSocket(), socketStatus }}>
