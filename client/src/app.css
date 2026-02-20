@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer utilities {
 	.hide-scrollbar {
@@ -11,8 +12,114 @@
 }
 
 @layer base {
+	html {
+		color-scheme: light;
+	}
+
+	html.dark {
+		color-scheme: dark;
+	}
+
 	body {
-		@apply font-sans;
+		@apply font-sans bg-white text-gray-900 transition-colors duration-200;
+	}
+
+	html.dark body {
+		background-color: #0b0b0b;
+		color: #f5f5f5;
+	}
+
+	/* Global utility overrides to support dark mode on existing views */
+	.dark .bg-white {
+		background-color: #141414 !important;
+	}
+
+	.dark .bg-gray-50 {
+		background-color: #141414 !important;
+	}
+
+	.dark .bg-gray-100 {
+		background-color: #1e1e1e !important;
+	}
+
+	.dark .bg-gray-200 {
+		background-color: #2a2a2a !important;
+	}
+
+	.dark .bg-gray-300 {
+		background-color: #363636 !important;
+	}
+
+	.dark .bg-gray-800 {
+		background-color: #1a1a1a !important;
+	}
+
+	.dark .bg-gray-900 {
+		background-color: #141414 !important;
+	}
+
+	.dark .bg-gray-950 {
+		background-color: #0b0b0b !important;
+	}
+
+	.dark .hover\:bg-gray-50:hover {
+		background-color: #242424 !important;
+	}
+
+	.dark .hover\:bg-gray-100:hover {
+		background-color: #303030 !important;
+	}
+
+	.dark .hover\:bg-gray-200:hover {
+		background-color: #3c3c3c !important;
+	}
+
+	.dark .active\:bg-gray-200:active {
+		background-color: #3c3c3c !important;
+	}
+
+	.dark .text-black {
+		color: #f7f7f7 !important;
+	}
+
+	.dark .text-gray-900 {
+		color: #f2f2f2 !important;
+	}
+
+	.dark .text-gray-700 {
+		color: #dfdfdf !important;
+	}
+
+	.dark .text-gray-600 {
+		color: #c7c7c7 !important;
+	}
+
+	.dark .text-gray-500 {
+		color: #ababab !important;
+	}
+
+	.dark .hover\:text-gray-700:hover {
+		color: #e6e6e6 !important;
+	}
+
+	.dark .border-gray-200 {
+		border-color: #2d2d2d !important;
+	}
+
+	.dark .border-gray-300 {
+		border-color: #3a3a3a !important;
+	}
+
+	.dark .border-gray-400 {
+		border-color: #4a4a4a !important;
+	}
+
+	.dark .hover\:border-gray-300:hover {
+		border-color: #4a4a4a !important;
+	}
+
+	.dark .placeholder\:text-gray-400::placeholder {
+		color: #9a9a9a !important;
 	}
 }
 
