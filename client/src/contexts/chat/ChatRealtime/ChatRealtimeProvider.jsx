@@ -1,26 +1,27 @@
-import { useContext, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import useSocket from "../../socket/useSocket";
-import ChatContext from "../ChatContext";
+import useChatData from "../ChatData/useChatData";
+import useChatSession from "../ChatSession/useChatSession";
 import ChatRealtimeContext from "./ChatRealtimeContext";
 
 export default function ChatRealtimeProvider({ children }) {
-    const chat = useContext(ChatContext);
+    const chatData = useChatData();
+    const chatSession = useChatSession();
     const { socket, socketStatus } = useSocket();
-    const activeChatDataRef = useRef(chat?.activeChatData);
+    const activeChatDataRef = useRef(chatSession?.activeChatData);
 
     useEffect(() => {
-        activeChatDataRef.current = chat?.activeChatData;
-    }, [chat?.activeChatData]);
+        activeChatDataRef.current = chatSession?.activeChatData;
+    }, [chatSession?.activeChatData]);
 
     useEffect(() => {
-        if (!chat || !socket || socketStatus !== "connected") return;
+        if (!chatData || !chatSession || !socket || socketStatus !== "connected") return;
 
         const {
             setActiveChatMessages,
             setActiveChatData,
-            setChatItems,
-            setUserItems,
-        } = chat;
+        } = chatSession;
+        const { setChatItems, setUserItems } = chatData;
 
         const handleReceiveMessage = ({ tempMessageId, message }) => {
             setActiveChatMessages((prev) => {
@@ -88,12 +89,13 @@ export default function ChatRealtimeProvider({ children }) {
 
         socket.on("receiveMessage", handleReceiveMessage);
         return () => socket.off("receiveMessage", handleReceiveMessage);
-    }, [chat, socket, socketStatus]);
+    }, [chatData, chatSession, socket, socketStatus]);
 
     useEffect(() => {
-        if (!chat || !socket || socketStatus !== "connected") return;
+        if (!chatData || !chatSession || !socket || socketStatus !== "connected") return;
 
-        const { setChatItems, setActiveChatMessages } = chat;
+        const { setChatItems } = chatData;
+        const { setActiveChatMessages } = chatSession;
 
         const handleSeenUpdate = ({ chatId, seenMessages }) => {
             setChatItems((prev) =>
@@ -125,7 +127,7 @@ export default function ChatRealtimeProvider({ children }) {
 
         socket.on("messages:seenUpdate", handleSeenUpdate);
         return () => socket.off("messages:seenUpdate", handleSeenUpdate);
-    }, [chat, socket, socketStatus]);
+    }, [chatData, chatSession, socket, socketStatus]);
 
     return (
         <ChatRealtimeContext.Provider value={{}}>

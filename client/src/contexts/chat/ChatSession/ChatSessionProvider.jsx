@@ -1,14 +1,13 @@
-import { useState, useCallback } from "react";
-import ChatContext from "./ChatContext.js";
-import { isEmpty } from "../../utilities/utils.js";
-import useAuth from "../auth/useAuth.js";
-import useChatData from "./ChatData/useChatData.js";
+import { useCallback, useState } from "react";
+import { isEmpty } from "../../../utilities/utils";
+import useAuth from "../../auth/useAuth";
+import useChatData from "../ChatData/useChatData";
+import ChatSessionContext from "./ChatSessionContext";
 
-export default function ChatProvider({ children }) {
+export default function ChatSessionProvider({ children }) {
     const { currentUser } = useAuth();
-    const chatData = useChatData();
+    const { setChatItems, setUserItems } = useChatData() || {};
 
-    // ---- Chat States ----
     const [activeChatData, setActiveChatData] = useState(null);
     const [activeChatMessages, setActiveChatMessages] = useState([]);
     const [selectedMediaAttachments, setSelectedMediaAttachments] = useState([]);
@@ -33,7 +32,7 @@ export default function ChatProvider({ children }) {
         };
     };
 
-    const normalizeChat = (data, currentUser) => {
+    const normalizeChat = (data, authUser) => {
         if (isEmpty(data)) return null;
 
         const baseChat = {
@@ -54,9 +53,9 @@ export default function ChatProvider({ children }) {
             return {
                 ...baseChat,
                 isGroup: false,
-                participants: [data, currentUser],
+                participants: [data, authUser],
                 type: "temp",
-                clientTempChatId: `temp-chat-${crypto.randomUUID()}`
+                clientTempChatId: `temp-chat-${crypto.randomUUID()}`,
             };
         }
 
@@ -66,7 +65,7 @@ export default function ChatProvider({ children }) {
                 ...data,
                 isGroup: data.participants?.length > 2,
                 type: "temp",
-                clientTempChatId: `temp-chat-${crypto.randomUUID()}`
+                clientTempChatId: `temp-chat-${crypto.randomUUID()}`,
             };
         }
 
@@ -82,59 +81,43 @@ export default function ChatProvider({ children }) {
         };
     };
 
-
-    // ---- Select Chat ----
-    const setNormalizedActiveChat = useCallback((data) => {
-        const normalized = normalizeChat(data, currentUser);
-        if (!normalized) return;
-
-        setActiveChatData(normalized);
-    }, [currentUser]);
+    const setNormalizedActiveChat = useCallback(
+        (data) => {
+            const normalized = normalizeChat(data, currentUser);
+            if (!normalized) return;
+            setActiveChatData(normalized);
+        },
+        [currentUser],
+    );
 
     const clearActiveChat = useCallback(() => {
         setActiveChatData(null);
-    }, [setActiveChatData]);
+    }, []);
 
     const clearActiveChatMessages = useCallback(() => {
         setActiveChatMessages([]);
-    }, [setActiveChatMessages]);
-
-    const {
-        chatItems,
-        setChatItems,
-        userItems,
-        setUserItems,
-        usersAndChatsList,
-        isLoading,
-        error,
-    } = chatData || {};
+    }, []);
 
     const addOptimisticMessage = (message, targetChat) => {
         if (!targetChat) return;
 
-        // 1️⃣ Append optimistic message.
-        setActiveChatMessages(prev => [...prev, message]);
+        setActiveChatMessages((prev) => [...prev, message]);
 
-        // 2️⃣ Update ActiveChatData's last message data.
-        setActiveChatData(prev => {
-            if (!prev) return targetChat; // ✅ CRITICAL
+        setActiveChatData((prev) => {
+            if (!prev) return targetChat;
             return { ...prev, lastMessage: message };
         });
 
-        // 3️⃣ Update chat list + move chat to top
-        setChatItems(prev => {
+        setChatItems?.((prev) => {
             const chatKey = targetChat.clientTempChatId ?? targetChat._id;
-
             const index = prev.findIndex(
-                chat => (chat.clientTempChatId ?? chat._id) === chatKey
+                (chat) => (chat.clientTempChatId ?? chat._id) === chatKey,
             );
 
-            // not found → prepend temp/new chat
             if (index === -1) {
                 return [{ ...targetChat, lastMessage: message }, ...prev];
             }
 
-            // update + move to top
             const updatedChat = {
                 ...prev[index],
                 lastMessage: message,
@@ -147,47 +130,32 @@ export default function ChatProvider({ children }) {
             ];
         });
 
-        // 4️⃣ Remove messaged user from suggested list
-        setUserItems((prev) => {
+        setUserItems?.((prev) => {
             if (!message?.sender?._id) return prev;
-
             return prev.filter(
-                (user) => String(user?._id) !== String(message.sender._id)
+                (user) => String(user?._id) !== String(message.sender._id),
             );
         });
     };
 
-    // ---- Context Value ----
-    const values = {
-        // chat states
+    const data = {
         activeChatData,
-        activeChatMessages,
-        addOptimisticMessage,
-        setActiveChatMessages,
-        setNormalizedActiveChat,
-        normalizeChat,
         setActiveChatData,
+        activeChatMessages,
+        setActiveChatMessages,
         selectedMediaAttachments,
         setSelectedMediaAttachments,
-        clearActiveChat,
         createEmptyTempChat,
+        normalizeChat,
+        setNormalizedActiveChat,
+        clearActiveChat,
         clearActiveChatMessages,
-
-        // fetched lists
-        chatItems,
-        setChatItems,
-        userItems,
-        setUserItems,
-        usersAndChatsList,
-
-        // fetching status
-        isLoading,
-        error,
+        addOptimisticMessage,
     };
 
     return (
-        <ChatContext.Provider value={values}>
+        <ChatSessionContext.Provider value={data}>
             {children}
-        </ChatContext.Provider>
+        </ChatSessionContext.Provider>
     );
 }
