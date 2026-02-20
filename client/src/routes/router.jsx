@@ -1,92 +1,67 @@
 import { createBrowserRouter, Navigate } from "react-router";
-import ChatApp from "../pages/ChatApp";
+import RouteErrorBoundary from "./RouteErrorBoundary";
 
-/* Auth */
-import StartAuth from "../pages/Auth/StartAuth";
-import Login from "../pages/Auth/Login";
-import Register from "../pages/Auth/Register";
-import ForgotPassword from "../pages/Auth/ForgotPassword";
-import ResetPassword from "../pages/Auth/ResetPassword";
-
-/* Chat */
-import ProtectedRoute from "../components/ProtectedRoute";
-import Start from "../components/chat/start/Start";
-import MainWindow from "../components/chat/MainWindow";
-import ChatLayout from "../components/chat/conversation/ChatLayout";
-import ChatWindow from "../components/chat/conversation/ChatWindow";
-
-/* Settings */
-import Profile from "../pages/Profile";
-
-/* Context */
-import ChatProvider from "../contexts/chat/ChatProvider";
-import ActiveChatProvider from "../contexts/chat/ActiveChat/ActiveChatProvider";
-import ChatDisplayProvider from "../contexts/chat/ChatDisplay/ChatDisplayProvider";
-import VerifyEmail from "../pages/Auth/VerifyEmail";
+const lazyComponent = (importer) =>
+    async () => {
+        const module = await importer();
+        return { Component: module.default };
+    };
 
 export const routes = createBrowserRouter([
     {
         path: "/auth",
-        element: <StartAuth />,
+        errorElement: <RouteErrorBoundary />,
+        lazy: lazyComponent(() => import("../pages/Auth/StartAuth")),
         children: [
-            { index: true, element: <Login /> },
-            { path: "login", element: <Login /> },
-            { path: "register", element: <Register /> },
-            { path: "verify-email", element: <VerifyEmail /> },
-            { path: "forgot-password", element: <ForgotPassword /> },
-            { path: "reset-password", element: <ResetPassword /> },
-        ]
+            { index: true, lazy: lazyComponent(() => import("../pages/Auth/Login")) },
+            { path: "login", lazy: lazyComponent(() => import("../pages/Auth/Login")) },
+            { path: "register", lazy: lazyComponent(() => import("../pages/Auth/Register")) },
+            { path: "verify-email", lazy: lazyComponent(() => import("../pages/Auth/VerifyEmail")) },
+            { path: "forgot-password", lazy: lazyComponent(() => import("../pages/Auth/ForgotPassword")) },
+            { path: "reset-password", lazy: lazyComponent(() => import("../pages/Auth/ResetPassword")) },
+        ],
     },
     {
-        element: <ProtectedRoute />,
+        errorElement: <RouteErrorBoundary />,
+        lazy: lazyComponent(() => import("../components/ProtectedRoute")),
         children: [
             {
                 path: "/chats",
-                element: (
-                    <ChatProvider>
-                        <ChatDisplayProvider>
-                            <ActiveChatProvider>
-                                <ChatApp />
-                            </ActiveChatProvider>
-                        </ChatDisplayProvider>
-                    </ChatProvider>
-                ),
+                errorElement: <RouteErrorBoundary />,
+                lazy: lazyComponent(() => import("./ChatsAppShell")),
                 children: [
                     {
                         path: "",
-                        element: <MainWindow />,
+                        lazy: lazyComponent(() => import("../components/chat/MainWindow")),
                         children: [
-                            {
-                                index: true,
-                                element: <Start />
-                            },
+                            { index: true, lazy: lazyComponent(() => import("../components/chat/start/Start")) },
                             {
                                 path: ":chatId",
-                                element: <ChatLayout />,
+                                lazy: lazyComponent(() => import("../components/chat/conversation/ChatLayout")),
                                 children: [
-                                    { index: true, element: <ChatWindow /> }
-                                ]
+                                    { index: true, lazy: lazyComponent(() => import("../components/chat/conversation/ChatWindow")) },
+                                ],
                             },
                             {
                                 path: "new",
-                                element: <ChatLayout />,
+                                lazy: lazyComponent(() => import("../components/chat/conversation/ChatLayout")),
                                 children: [
-                                    { index: true, element: <ChatWindow /> }
-                                ]
+                                    { index: true, lazy: lazyComponent(() => import("../components/chat/conversation/ChatWindow")) },
+                                ],
                             },
                             {
                                 path: "*",
-                                element: <Navigate to="" replace />,
+                                element: <Navigate to="." replace />,
                             },
-                        ]
-                    }
-                ]
+                        ],
+                    },
+                ],
             },
             {
                 path: "/profile",
-                element: <Profile />
-            }
-        ]
+                lazy: lazyComponent(() => import("../pages/Profile")),
+            },
+        ],
     },
     {
         path: "/",
