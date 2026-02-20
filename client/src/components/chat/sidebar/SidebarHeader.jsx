@@ -2,12 +2,12 @@ import { Link } from "react-router"
 import { RiEditBoxLine } from "react-icons/ri";
 
 import SidebarHeaderSkeleton from "./SidebarHeaderSkeleton";
-import useChat from "../../../contexts/chat/useChat";
 import useAuth from "../../../contexts/auth/useAuth";
 import useSocket from "../../../contexts/socket/useSocket";
+import useChatData from "../../../contexts/chat/ChatData/useChatData";
 
 export default function SidebarHeader() {
-	const { isLoading } = useChat();
+	const { isLoading } = useChatData();
 	const { authStatus } = useAuth();
 	const { socketStatus } = useSocket();
 

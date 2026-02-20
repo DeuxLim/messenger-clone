@@ -1,12 +1,12 @@
 import useAuth from "../../../contexts/auth/useAuth";
-import useChat from "../../../contexts/chat/useChat";
 import useToggle from "../../../hooks/common/useToggle";
 import { formatLastMessageDateTime, isEmpty, isEmojiOnly } from "../../../utilities/utils";
 import AvatarImage from "../global/AvatarImage";
+import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
 
 export default function ChatMessage({ data }) {
     const { currentUser } = useAuth();
-    const { activeChatData, activeChatMessages } = useChat();
+    const { activeChatData, activeChatMessages } = useChatSession();
     const [messageClicked, setMessageClicked] = useToggle(false);
 
     const emojiOnly = isEmojiOnly(data.text);

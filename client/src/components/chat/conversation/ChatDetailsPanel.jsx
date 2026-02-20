@@ -1,11 +1,11 @@
 import { getOtherParticipant, getOtherParticipants } from '../../../utilities/utils';
 import AvatarImage from '../global/AvatarImage';
 import useOtherParticipants from '../../../hooks/chat/useOtherParticipants';
-import useChat from '../../../contexts/chat/useChat';
 import useAuth from '../../../contexts/auth/useAuth';
+import useChatSession from '../../../contexts/chat/ChatSession/useChatSession';
 
 export default function ChatDetailsPanel() {
-    const { activeChatData } = useChat();
+    const { activeChatData } = useChatSession();
     const { currentUser } = useAuth();
     const chatParticipants = useOtherParticipants(activeChatData, currentUser._id);
 

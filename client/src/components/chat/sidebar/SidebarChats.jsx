@@ -2,20 +2,19 @@ import ChatItem from "../global/ChatItem";
 import CenteredMessage from "../../common/CenteredMessage";
 import { useMemo } from "react";
 import SidebarChatsSkeleton from "./SidebarChatsSkeleton";
-import useChat from "../../../contexts/chat/useChat";
 import { useLocation } from "react-router";
+import useChatData from "../../../contexts/chat/ChatData/useChatData";
+import useChatSearch from "../../../contexts/chat/ChatSearch/useChatSearch";
+import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
 
 export default function SidebarChats() {
     const { pathname } = useLocation();
+    const { usersAndChatsList, isLoading = false, error = null } = useChatData();
+    const { searchResults, isSearch = false } = useChatSearch();
     const {
-        usersAndChatsList,
-        searchResults,
-        isSearch = false,
-        isLoading = false,
-        error = null,
         activeChatData,
         createEmptyTempChat,
-    } = useChat();
+    } = useChatSession();
 
     const chatNodes = useMemo(() => {
         const filtered = isSearch

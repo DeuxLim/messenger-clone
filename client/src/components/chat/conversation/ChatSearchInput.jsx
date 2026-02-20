@@ -7,12 +7,12 @@ import { RxCross2 } from "react-icons/rx";
 import ChatItem from "../global/ChatItem";
 import { useNavigate } from "react-router";
 import useAuth from "../../../contexts/auth/useAuth";
-import useChat from "../../../contexts/chat/useChat";
 import useActiveChat from "../../../contexts/chat/ActiveChat/useActiveChat";
+import useChatData from "../../../contexts/chat/ChatData/useChatData";
 
 export default function ChatSearchInput() {
     const { currentUser } = useAuth();
-    const { usersAndChatsList } = useChat();
+    const { usersAndChatsList } = useChatData();
     const { selectedChats, setSelectedChats } = useActiveChat();
 
     const chipRef = useRef(null);

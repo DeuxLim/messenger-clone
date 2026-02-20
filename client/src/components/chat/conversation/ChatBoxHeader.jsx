@@ -7,12 +7,14 @@ import { useNavigate } from "react-router";
 import useOtherParticipants from "../../../hooks/chat/useOtherParticipants";
 import AvatarImage from "../global/AvatarImage";
 import { useMemo } from "react";
-import useChat from "../../../contexts/chat/useChat";
 import useAuth from "../../../contexts/auth/useAuth";
 import useChatDisplay from "../../../contexts/chat/ChatDisplay/useChatDisplay";
+import useChatPresence from "../../../contexts/chat/ChatPresence/useChatPresence";
+import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
 
 export default function ChatBoxHeader() {
-	const { activeChatData, isUserOnline } = useChat();
+	const { activeChatData } = useChatSession();
+	const { isUserOnline } = useChatPresence();
 	const { currentUser } = useAuth();
 	const { setIsChatSettingsOpen } = useChatDisplay();
 	const navigate = useNavigate();

@@ -1,14 +1,18 @@
 import { TbSearch } from "react-icons/tb";
 import useDebounceSearch from "../../../hooks/common/useDebounceSearch";
 import SidebarSearchSkeleton from "./SidebarSearchSkeleton";
-import useChat from "../../../contexts/chat/useChat";
 import useAuth from "../../../contexts/auth/useAuth";
 import useSocket from "../../../contexts/socket/useSocket";
 import { searchChatAndUsers } from "../../../services/chats.service";
 import { useEffect, useRef } from "react";
+import useChatData from "../../../contexts/chat/ChatData/useChatData";
+import useChatSearch from "../../../contexts/chat/ChatSearch/useChatSearch";
+import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
 
 export default function SidebarSearch() {
-    const { updateChatSearchResults, isLoading, activeChatData } = useChat();
+    const { updateChatSearchResults } = useChatSearch();
+    const { isLoading } = useChatData();
+    const { activeChatData } = useChatSession();
     const { authStatus } = useAuth();
     const { socketStatus } = useSocket();
 

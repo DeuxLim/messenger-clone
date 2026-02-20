@@ -7,13 +7,17 @@ import ChatItemName from "./chat-item/ChatItemName";
 import ChatItemContentPreview from "./chat-item/ChatItemContentPreview";
 import ChatItemMeta from "./chat-item/ChatItemMeta";
 import AvatarImage from "./AvatarImage";
-import useChat from "../../../contexts/chat/useChat";
 import useChatDisplay from "../../../contexts/chat/ChatDisplay/useChatDisplay";
 import useActiveChat from "../../../contexts/chat/ActiveChat/useActiveChat";
 import useAuth from "../../../contexts/auth/useAuth";
+import useChatPresence from "../../../contexts/chat/ChatPresence/useChatPresence";
+import useChatSearch from "../../../contexts/chat/ChatSearch/useChatSearch";
+import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
 
 function ChatItem({ chatData, variant, isSelecting = false }) {
-    const { isUserOnline, activeChatData, isSearch, updateChatSearchResults } = useChat();
+    const { isUserOnline } = useChatPresence();
+    const { activeChatData } = useChatSession();
+    const { isSearch, updateChatSearchResults } = useChatSearch();
     const { setSelectedChats, selectedChats } = useActiveChat();
     const { currentUser } = useAuth();
     const navigate = useNavigate();

@@ -4,14 +4,14 @@ import ChatMessage from "./ChatMessage";
 import AvatarImage from "../global/AvatarImage";
 import ChatDetailsPanel from "./ChatDetailsPanel";
 import useAuth from "../../../contexts/auth/useAuth";
-import useChat from "../../../contexts/chat/useChat";
 import useChatDisplay from "../../../contexts/chat/ChatDisplay/useChatDisplay";
 import useSocket from "../../../contexts/socket/useSocket";
 import { getChatMessages } from "../../../services/chats.service";
+import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
 
 export default function ChatContent() {
     const { token, currentUser } = useAuth();
-    const { setActiveChatMessages, activeChatMessages, activeChatData } = useChat();
+    const { setActiveChatMessages, activeChatMessages, activeChatData } = useChatSession();
     const { typingChats } = useChatDisplay();
     const { chatId } = useParams();
     const { socket } = useSocket();

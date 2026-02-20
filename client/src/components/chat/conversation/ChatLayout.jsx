@@ -8,20 +8,21 @@ import ChatBoxHeader from "./ChatBoxHeader";
 import ChatSearchInput from "./ChatSearchInput";
 
 import useAuth from "../../../contexts/auth/useAuth";
-import useChat from "../../../contexts/chat/useChat";
 import useActiveChat from "../../../contexts/chat/ActiveChat/useActiveChat";
 import { joinChat } from "../../../realtime/presenceSocket";
+import useChatData from "../../../contexts/chat/ChatData/useChatData";
+import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
 
 export default function ChatLayout() {
 	const { currentUser } = useAuth();
+	const { usersAndChatsList } = useChatData();
 	const {
-		usersAndChatsList,
 		activeChatData,
 		clearActiveChat,
 		clearActiveChatMessages,
 		setActiveChatMessages,
 		setNormalizedActiveChat,
-	} = useChat();
+	} = useChatSession();
 
 	const { selectedChats } = useActiveChat();
 

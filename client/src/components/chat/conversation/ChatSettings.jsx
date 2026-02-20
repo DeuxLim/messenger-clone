@@ -9,13 +9,15 @@ import { IoMdArrowBack } from "react-icons/io";
 import { IoMdCheckmark } from "react-icons/io";
 import { useMemo, useState } from 'react';
 import { MdModeEdit } from "react-icons/md";
-import useChat from '../../../contexts/chat/useChat';
 import useAuth from '../../../contexts/auth/useAuth';
 import useChatDisplay from '../../../contexts/chat/ChatDisplay/useChatDisplay';
 import useSocket from '../../../contexts/socket/useSocket';
+import useChatPresence from '../../../contexts/chat/ChatPresence/useChatPresence';
+import useChatSession from '../../../contexts/chat/ChatSession/useChatSession';
 
 export default function ChatSettings() {
-    const { activeChatData, isUserOnline } = useChat();
+    const { activeChatData } = useChatSession();
+    const { isUserOnline } = useChatPresence();
     const { currentUser } = useAuth();
     const [isCustomizeChatExpanded, setIsCustomizeChatExpanded] = useToggle();
     const [isChatMembersExpanded, setIsChatMembersExpanded] = useToggle();

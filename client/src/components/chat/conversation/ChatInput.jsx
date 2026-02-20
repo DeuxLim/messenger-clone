@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router";
-import useChat from "../../../contexts/chat/useChat";
 import useAuth from "../../../contexts/auth/useAuth";
 import useSocket from "../../../contexts/socket/useSocket";
 import { FaThumbsUp } from "react-icons/fa6";
@@ -12,10 +11,13 @@ import { HiPaperAirplane } from "react-icons/hi2";
 import { createChat } from "../../../services/chats.service";
 import useActiveChat from "../../../contexts/chat/ActiveChat/useActiveChat";
 import { joinChat } from "../../../realtime/presenceSocket";
+import useChatData from "../../../contexts/chat/ChatData/useChatData";
+import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
 
 export default function ChatInput() {
 	const [message, setMessage] = useState("");
-	const { activeChatData, addOptimisticMessage, setNormalizedActiveChat, setActiveChatMessages, setChatItems } = useChat();
+	const { setChatItems } = useChatData();
+	const { activeChatData, addOptimisticMessage, setNormalizedActiveChat, setActiveChatMessages } = useChatSession();
 	const { setSelectedChats } = useActiveChat();
 	const { currentUser } = useAuth();
 	const { socket } = useSocket();
