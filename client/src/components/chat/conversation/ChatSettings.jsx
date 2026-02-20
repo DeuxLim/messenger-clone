@@ -18,6 +18,8 @@ import useChatSession from '../../../contexts/chat/ChatSession/useChatSession';
 import useChatData from '../../../contexts/chat/ChatData/useChatData';
 import useChatSearch from '../../../contexts/chat/ChatSearch/useChatSearch';
 import { deleteChat } from '../../../services/chats.service';
+import useToast from '../../../contexts/ui/useToast';
+import { getErrorMessage } from '../../../utilities/errors';
 
 export default function ChatSettings() {
     const { activeChatData, clearActiveChat, clearActiveChatMessages } = useChatSession();
@@ -37,6 +39,7 @@ export default function ChatSettings() {
     const [isDeletingChat, setIsDeletingChat] = useState(false);
     const { socket } = useSocket();
     const navigate = useNavigate();
+    const toast = useToast();
 
     const chatParticipants = useOtherParticipants(activeChatData, currentUser._id);
     const isGroup = !!activeChatData?.isGroup;
@@ -65,8 +68,9 @@ export default function ChatSettings() {
 
             socket.emit("chat:chatNameUpdate", payload)
             setIsChatNameEditModalDisplayed(false);
+            toast.success("Chat name updated.");
         } catch (error) {
-            console.log(error);
+            toast.error(getErrorMessage(error, "Failed to update chat name."));
         }
     }
 
@@ -88,8 +92,9 @@ export default function ChatSettings() {
 
             socket.emit("chat:updateChat", payload);
             setEditingParticipantId(null);
+            toast.success("Nickname updated.");
         } catch (error) {
-            console.log(error);
+            toast.error(getErrorMessage(error, "Failed to update nickname."));
         }
     };
 
@@ -130,8 +135,9 @@ export default function ChatSettings() {
             setIsChatSettingsOpen(false);
             setIsDeleteChatModalDisplayed(false);
             navigate("/chats", { replace: true });
+            toast.success("Chat deleted.");
         } catch (error) {
-            console.error("Failed to delete chat:", error);
+            toast.error(getErrorMessage(error, "Failed to delete chat."));
         } finally {
             setIsDeletingChat(false);
         }

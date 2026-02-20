@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { verifyEmailService } from "../../services/auth.service";
+import useToast from "../../contexts/ui/useToast";
+import { getErrorMessage } from "../../utilities/errors";
 
 export default function VerifyEmail() {
     const [searchParams] = useSearchParams();
@@ -8,6 +10,7 @@ export default function VerifyEmail() {
 
     const [status, setStatus] = useState("loading");
     const [message, setMessage] = useState("");
+    const toast = useToast();
 
     useEffect(() => {
         if (!token) {
@@ -23,14 +26,14 @@ export default function VerifyEmail() {
                 setStatus("success");
                 setMessage("Your email has been verified. Please log in again.");
             } catch (err) {
-                console.error(err);
+                toast.error(getErrorMessage(err, "Verification failed."));
                 setStatus("error");
                 setMessage(err.message || "Verification failed.");
             }
         };
 
         verifyEmail();
-    }, [token]);
+    }, [token, toast]);
 
     return (
         <div className="flex items-center justify-center w-full px-4 min-h-80">

@@ -2,6 +2,8 @@ import { useId, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { isEmpty } from "../../utilities/utils";
 import { forgotPasswordService } from "../../services/auth.service";
+import useToast from "../../contexts/ui/useToast";
+import { getErrorMessage } from "../../utilities/errors";
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
@@ -11,6 +13,7 @@ export default function ForgotPassword() {
 
     const elementUserEmailId = useId();
     const navigate = useNavigate();
+    const toast = useToast();
 
     function validateForm() {
         const newErrors = {};
@@ -41,7 +44,7 @@ export default function ForgotPassword() {
                 "If that email exists, a password reset link has been sent."
             );
         } catch (err) {
-            console.error(err);
+            toast.error(getErrorMessage(err, "Something went wrong. Please try again."));
             setStatus("error");
             setMessage("Something went wrong. Please try again.");
         }

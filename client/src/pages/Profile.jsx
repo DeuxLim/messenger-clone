@@ -5,6 +5,7 @@ import { IoCameraOutline } from "react-icons/io5";
 import { useNavigate } from "react-router";
 import defaultUserImage from "../assets/images/default-user.png"
 import useAuth from "../contexts/auth/useAuth";
+import useToast from "../contexts/ui/useToast";
 
 export default function Profile() {
 	const {
@@ -14,6 +15,7 @@ export default function Profile() {
 	} = useAuth();
 
 	const navigate = useNavigate();
+	const toast = useToast();
 
 	const [isEditMode, setIsEditMode] = useState(false);
 	const [formData, setFormData] = useState(null);
@@ -65,12 +67,30 @@ export default function Profile() {
 	};
 
 	const handleSaveProfile = async () => {
-		await updateUserProfile(formData);
+		const updates = {};
 
-		if (previewImg !== currentUser.profilePicture?.url) {
-			await updateUserProfile({ profilePicture: previewImg });
+		Object.keys(editableFields).forEach((field) => {
+			if (formData?.[field] !== currentUser?.[field]) {
+				updates[field] = formData?.[field];
+			}
+		});
+
+		const hasNewProfileImage =
+			typeof previewImg === "string" &&
+			previewImg.startsWith("data:") &&
+			previewImg !== currentUser?.profilePicture?.url;
+
+		if (hasNewProfileImage) {
+			updates.profilePicture = previewImg;
 		}
 
+		if (Object.keys(updates).length === 0) {
+			toast.info("No changes to save.");
+			setIsEditMode(false);
+			return;
+		}
+
+		await updateUserProfile(updates);
 		setIsEditMode(false);
 	};
 
@@ -84,12 +104,12 @@ export default function Profile() {
 		const { currentPassword, newPassword, confirmPassword } = passwordData;
 
 		if (!currentPassword || !newPassword) {
-			alert("All password fields are required.");
+			toast.error("All password fields are required.");
 			return;
 		}
 
 		if (newPassword !== confirmPassword) {
-			alert("Passwords do not match.");
+			toast.error("Passwords do not match.");
 			return;
 		}
 

@@ -7,10 +7,13 @@ import { isEmpty } from "../utilities/utils";
 import useAuth from "../contexts/auth/useAuth";
 import useChatDisplay from "../contexts/chat/ChatDisplay/useChatDisplay";
 import { resendVerificationService } from "../services/auth.service";
+import useToast from "../contexts/ui/useToast";
+import { getErrorMessage } from "../utilities/errors";
 
 export default function ChatApp() {
     const { sidebarVisible, isDesktop, isChatSettingsOpen } = useChatDisplay();
     const { currentUser } = useAuth();
+    const toast = useToast();
     const location = useLocation();
     const isRoot = location.pathname === "/chats";
 
@@ -31,7 +34,7 @@ export default function ChatApp() {
             setResendSuccess(true);
             setResendMessage(message);
         } catch (err) {
-            console.error(err);
+            toast.error(getErrorMessage(err, "Failed to resend verification email."));
             setResendSuccess(false);
             setResendMessage("Failed to resend verification email.");
         } finally {

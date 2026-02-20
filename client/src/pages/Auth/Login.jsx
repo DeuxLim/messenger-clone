@@ -6,6 +6,8 @@ import { IoEyeOutline } from "react-icons/io5";
 import { isEmpty } from "../../utilities/utils";
 import useAuth from "../../contexts/auth/useAuth";
 import { loginService } from "../../services/auth.service";
+import useToast from "../../contexts/ui/useToast";
+import { getErrorMessage } from "../../utilities/errors";
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -19,6 +21,7 @@ export default function Login() {
     const navigate = useNavigate();
     const { login } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
+    const toast = useToast();
 
     function validateForm() {
         const newErrors = {};
@@ -57,8 +60,9 @@ export default function Login() {
             login(user, accessToken); // context state only
             navigate("/chats");
         } catch (err) {
-            console.error(err);
-            setErrors({ general: err.message || "Login failed" });
+            const message = getErrorMessage(err, "Login failed");
+            toast.error(message);
+            setErrors({ general: message });
         } finally {
             setLoading(false);
         }

@@ -9,6 +9,8 @@ import useSocket from "../../../contexts/socket/useSocket";
 import { getChatMessages } from "../../../services/chats.service";
 import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
 import useSeenMessages from "../../../hooks/chat/useSeenMessages";
+import useToast from "../../../contexts/ui/useToast";
+import { getErrorMessage } from "../../../utilities/errors";
 
 export default function ChatContent() {
     const { token, currentUser } = useAuth();
@@ -16,6 +18,7 @@ export default function ChatContent() {
     const { typingChats } = useChatDisplay();
     const { chatId } = useParams();
     const { socket } = useSocket();
+    const toast = useToast();
 
     const [error, setError] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +48,7 @@ export default function ChatContent() {
                 setActiveChatMessages(messages);
             } catch (err) {
                 if (isMounted) setError(true);
-                console.error("Chat fetch error:", err);
+                toast.error(getErrorMessage(err, "Failed to load messages."));
             } finally {
                 if (isMounted) setIsLoading(false);
             }
@@ -56,7 +59,7 @@ export default function ChatContent() {
         return () => {
             isMounted = false;
         };
-    }, [chatId, token, setActiveChatMessages]);
+    }, [chatId, token, setActiveChatMessages, toast]);
 
     // Scroll to bottom when messages change
     useLayoutEffect(() => {

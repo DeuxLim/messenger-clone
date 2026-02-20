@@ -13,6 +13,8 @@ import useActiveChat from "../../../contexts/chat/ActiveChat/useActiveChat";
 import { joinChat } from "../../../realtime/presenceSocket";
 import useChatData from "../../../contexts/chat/ChatData/useChatData";
 import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
+import useToast from "../../../contexts/ui/useToast";
+import { getErrorMessage } from "../../../utilities/errors";
 
 export default function ChatInput() {
 	const [message, setMessage] = useState("");
@@ -21,6 +23,7 @@ export default function ChatInput() {
 	const { setSelectedChats } = useActiveChat();
 	const { currentUser } = useAuth();
 	const { socket } = useSocket();
+	const toast = useToast();
 	const navigate = useNavigate();
 	const fileInputRef = useRef(null);
 	const [selectedMediaAttachments, setSelectedMediaAttachments] = useState([]);
@@ -136,7 +139,7 @@ export default function ChatInput() {
 				setMessage("");
 				setSelectedMediaAttachments([]);
 			} catch (err) {
-				console.error("Message send failed:", err);
+				toast.error(getErrorMessage(err, "Message failed to send."));
 			}
 		},
 
@@ -153,6 +156,7 @@ export default function ChatInput() {
 			setNormalizedActiveChat,
 			setChatItems,
 			setSelectedChats,
+			toast,
 		]
 	);
 

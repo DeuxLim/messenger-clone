@@ -3,12 +3,15 @@ import AuthContext from "./AuthContext";
 import { fetchAPI } from "../../api/fetchAPI";
 import { logoutService, refreshSessionService } from "../../services/auth.service";
 import { updatePassword, updateProfile } from "../../services/user.service";
+import useToast from "../ui/useToast";
+import { getErrorMessage } from "../../utilities/errors";
 
 export default function AuthProvider({ children }) {
     const [authStatus, setAuthStatus] = useState("checking"); // "checking" | "authenticated" | "unauthenticated"
     const [currentUser, setCurrentUser] = useState(null);
     const [token, setToken] = useState(null);
     const hasBootstrapped = useRef(false);
+    const toast = useToast();
 
     const setAuthenticated = (user, accessToken) => {
         setCurrentUser(user);
@@ -71,17 +74,19 @@ export default function AuthProvider({ children }) {
             try {
                 const response = await updateProfile(data);
                 setCurrentUser(response.user);
+                toast.success("Profile updated.");
             } catch (error) {
-                console.log(error);
+                toast.error(getErrorMessage(error, "Failed to update profile."));
             }
         },
         updatePassword: async (data) => {
             try {
                 const response = await updatePassword(data);
+                toast.success("Password updated.");
 
                 return response;
             } catch (error) {
-                console.log(error);
+                toast.error(getErrorMessage(error, "Failed to update password."));
             }
         },
     };

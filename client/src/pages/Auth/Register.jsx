@@ -5,6 +5,8 @@ import { IoEyeOffOutline } from "react-icons/io5";
 import { IoEyeOutline } from "react-icons/io5";
 import { isEmpty } from "../../utilities/utils.js";
 import { registerService } from "../../services/auth.service.js";
+import useToast from "../../contexts/ui/useToast.js";
+import { getErrorMessage } from "../../utilities/errors.js";
 
 export default function Login() {
     const [firstName, setFirstName] = useState("");
@@ -24,6 +26,7 @@ export default function Login() {
     const elementConfirmPasswordId = useId();
 
     const navigate = useNavigate();
+    const toast = useToast();
 
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
@@ -86,12 +89,12 @@ export default function Login() {
 
             navigate("/auth/login", { replace: true });
         } catch (err) {
-            console.error(err);
-
             if (err.fieldErrors) {
                 setErrors(err.fieldErrors); // backend field errors
             } else {
-                setErrors({ general: err.message || "Something went wrong..." });
+                const message = getErrorMessage(err, "Something went wrong...");
+                toast.error(message);
+                setErrors({ general: message });
             }
         } finally {
             setLoading(false);

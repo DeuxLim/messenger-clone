@@ -8,11 +8,14 @@ import { useEffect, useRef } from "react";
 import useChatData from "../../../contexts/chat/ChatData/useChatData";
 import useChatSearch from "../../../contexts/chat/ChatSearch/useChatSearch";
 import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
+import useToast from "../../../contexts/ui/useToast";
+import { getErrorMessage } from "../../../utilities/errors";
 
 export default function SidebarSearch() {
     const { updateChatSearchResults } = useChatSearch();
     const { isLoading } = useChatData();
     const { activeChatData } = useChatSession();
+    const toast = useToast();
     const { authStatus } = useAuth();
     const { socketStatus } = useSocket();
 
@@ -35,7 +38,7 @@ export default function SidebarSearch() {
                 isSearch: true,
             });
         } catch (error) {
-            console.error("Error searching chats:", error);
+            toast.error(getErrorMessage(error, "Failed to search chats."));
         }
     };
 

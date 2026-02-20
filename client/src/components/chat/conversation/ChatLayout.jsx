@@ -12,9 +12,12 @@ import useActiveChat from "../../../contexts/chat/ActiveChat/useActiveChat";
 import { joinChat } from "../../../realtime/presenceSocket";
 import useChatData from "../../../contexts/chat/ChatData/useChatData";
 import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
+import useToast from "../../../contexts/ui/useToast";
+import { getErrorMessage } from "../../../utilities/errors";
 
 export default function ChatLayout() {
 	const { currentUser } = useAuth();
+	const toast = useToast();
 	const { usersAndChatsList } = useChatData();
 	const {
 		activeChatData,
@@ -105,7 +108,7 @@ export default function ChatLayout() {
 				handleExistingChat();
 			}
 		} catch (err) {
-			console.error("ChatLayout error:", err);
+			toast.error(getErrorMessage(err, "Failed to load chat."));
 		} finally {
 			prevSelectedChatsRef.current = selectedChats;
 		}
@@ -114,6 +117,7 @@ export default function ChatLayout() {
 		selectedChats,
 		handleNewChat,
 		handleExistingChat,
+		toast,
 	]);
 
 	/* ---------------- Effects ---------------- */

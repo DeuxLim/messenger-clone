@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { resetPasswordService } from "../../services/auth.service";
+import useToast from "../../contexts/ui/useToast";
+import { getErrorMessage } from "../../utilities/errors";
 
 export default function ResetPassword() {
     const [searchParams] = useSearchParams();
@@ -10,6 +12,7 @@ export default function ResetPassword() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [status, setStatus] = useState("idle"); // idle | loading | success | error
     const [message, setMessage] = useState("");
+    const toast = useToast();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -40,7 +43,7 @@ export default function ResetPassword() {
             setStatus("success");
             setMessage("Your password has been reset successfully.");
         } catch (err) {
-            console.error(err);
+            toast.error(getErrorMessage(err, "Reset failed."));
             setStatus("error");
             setMessage(err.message || "Reset failed.");
         }
