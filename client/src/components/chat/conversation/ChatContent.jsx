@@ -79,7 +79,7 @@ export default function ChatContent() {
             <ChatDetailsPanel />
 
             <div className="p-3 flex flex-col gap-[2.5px] h-full" ref={messagesContainerRef}>
-                {activeChatMessages?.map((m) => {
+                {activeChatMessages?.map((m, index) => {
                     if (m.type === "system") {
                         return (
                             <div
@@ -92,9 +92,22 @@ export default function ChatContent() {
                         );
                     }
 
+                    const prevMsg = activeChatMessages[index - 1];
+                    const nextMsg = activeChatMessages[index + 1];
+                    const lastMessageId =
+                        typeof activeChatData?.lastMessage === "object"
+                            ? activeChatData?.lastMessage?._id
+                            : activeChatData?.lastMessage;
+
                     return (
                         <div key={m._id} data-message-id={m._id}>
-                            <ChatMessage data={m} />
+                            <ChatMessage
+                                data={m}
+                                prevMsg={prevMsg}
+                                nextMsg={nextMsg}
+                                isLastMessage={m?._id === lastMessageId}
+                                nicknames={activeChatData?.nicknames || {}}
+                            />
                         </div>
                     );
                 })}

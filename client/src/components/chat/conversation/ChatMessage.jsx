@@ -2,23 +2,20 @@ import useAuth from "../../../contexts/auth/useAuth";
 import useToggle from "../../../hooks/common/useToggle";
 import { formatLastMessageDateTime, isEmpty, isEmojiOnly } from "../../../utilities/utils";
 import AvatarImage from "../global/AvatarImage";
-import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
 
-export default function ChatMessage({ data }) {
+export default function ChatMessage({
+    data,
+    prevMsg,
+    nextMsg,
+    isLastMessage = false,
+    nicknames = {},
+}) {
     const { currentUser } = useAuth();
-    const { activeChatData, activeChatMessages } = useChatSession();
     const [messageClicked, setMessageClicked] = useToggle(false);
 
     const emojiOnly = isEmojiOnly(data.text);
 
     const isSender = data.sender?._id === currentUser?._id;
-    const isLastMessage =
-        data?._id === activeChatData.lastMessage?._id ||
-        data?._id === activeChatData.lastMessage;
-
-    const msgIndex = activeChatMessages.findIndex((msg) => msg?._id === data?._id);
-    const lastMsg = activeChatMessages[msgIndex - 1];
-    const nextMsg = activeChatMessages[msgIndex + 1];
 
     // --- Grouping and avatar logic ---
     const MESSAGE_GROUPING_INTERVAL = 5; // minutes
@@ -29,10 +26,10 @@ export default function ChatMessage({ data }) {
         return Math.abs(new Date(a) - new Date(b)) / 1000 / 60;
     };
 
-    const minutesDiffFromLast = getMinutesDiff(data?.createdAt, lastMsg?.createdAt);
+    const minutesDiffFromLast = getMinutesDiff(data?.createdAt, prevMsg?.createdAt);
     const timeGapFromLast = minutesDiffFromLast > MESSAGE_GROUPING_INTERVAL;
     const longTimeGapFromLast = minutesDiffFromLast > MESSAGE_GROUPING_LONG_INTERVAL;
-    const sameSenderAsLast = lastMsg && data.sender?._id === lastMsg.sender?._id;
+    const sameSenderAsLast = prevMsg && data.sender?._id === prevMsg.sender?._id;
     const isNewGroup = !sameSenderAsLast || timeGapFromLast;
 
     const minutesDiffToNext = getMinutesDiff(nextMsg?.createdAt, data?.createdAt);
@@ -68,7 +65,7 @@ export default function ChatMessage({ data }) {
                                 )}
                             </div>
                             <div className="flex flex-col max-w-2/3 gap-0.5">
-                                {isNewGroup || longTimeGapFromLast && <div className="px-3 text-xs text-gray-500">{activeChatData?.nicknames[data?.sender?._id] || data.sender.firstName}</div>}
+                                {isNewGroup || longTimeGapFromLast && <div className="px-3 text-xs text-gray-500">{nicknames[data?.sender?._id] || data.sender.firstName}</div>}
                                 <div
                                     id={`msg-${data?._id}`}
                                     data-seen={data.isSeen}
