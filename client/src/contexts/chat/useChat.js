@@ -1,6 +1,13 @@
 import { useContext } from "react";
 import ChatContext from "./ChatContext";
+import ChatPresenceContext from "./ChatPresence/ChatPresenceContext";
 
 export default function useChat(){
-    return useContext(ChatContext);
+    const chatContext = useContext(ChatContext);
+    const presenceContext = useContext(ChatPresenceContext);
+
+    return {
+        ...(chatContext || {}),
+        ...(presenceContext || {}),
+    };
 }

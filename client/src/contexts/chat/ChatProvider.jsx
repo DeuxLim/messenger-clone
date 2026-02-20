@@ -18,24 +18,8 @@ export default function ChatProvider({ children }) {
     const [userItems, setUserItems] = useState([]);
     const [isSearch, setIsSearch] = useState(false);
     const [searchResults, setSearchResults] = useState({ chats: [], users: [] });
-    const [onlineUsers, setOnlineUsers] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    /* Utilities */
-    const isUserOnline = useCallback(
-        (participants) => {
-            let isSomeoneOnline = false;
-            if (Array.isArray(participants)) {
-                isSomeoneOnline = participants.some(
-                    participant => onlineUsers[participant._id] === "online"
-                );
-            } else {
-                isSomeoneOnline = onlineUsers[participants] === "online"
-            }
-            return isSomeoneOnline
-        },
-        [onlineUsers]);
 
     const updateChatSearchResults = useCallback(
         ({ chats = [], users = [], isSearch = false }) => {
@@ -144,23 +128,6 @@ export default function ChatProvider({ children }) {
     useEffect(() => {
         if (!socket || socketStatus !== "connected") return;
 
-        socket.on("onlineUsers:list", (userIds) => {
-            const next = {};
-            userIds.forEach(id => {
-                next[id] = "online";
-            });
-            setOnlineUsers(next);
-        });
-
-        socket.on("presence:update", ({ userId, status }) => {
-            setOnlineUsers(prev => {
-                const next = { ...prev };
-                if (status === "online") next[userId] = "online";
-                else delete next[userId];
-                return next;
-            });
-        });
-
         // 1. append to activeChatMessages
         // 2. update activeChatData.lastMessage
         // 3. update chatItems (move chat to top, update preview)
@@ -246,11 +213,9 @@ export default function ChatProvider({ children }) {
         });
 
         return () => {
-            socket.off("onlineUsers:list");
-            socket.off("presence:update");
             socket.off("receiveMessage");
         };
-    }, [socket, activeChatData, socketStatus]);
+    }, [socket, socketStatus]);
 
     const addOptimisticMessage = (message, targetChat) => {
         if (!targetChat) return;
@@ -388,11 +353,8 @@ export default function ChatProvider({ children }) {
         searchResults,
 
         // presence + search
-        onlineUsers,
-        setOnlineUsers,
         isSearch,
         setIsSearch,
-        isUserOnline,
         updateChatSearchResults,
 
         // fetching status
