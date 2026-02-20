@@ -57,12 +57,12 @@ export default function ChatBoxHeader() {
 	}; */
 
 	return (
-		<header className="h-15 border-b border-gray-300 bg-white">
+		<header className="h-15 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900">
 			<div className="flex items-center justify-between h-full px-1">
 				{/* Back button (mobile only) */}
 				<button
 					onClick={handleBackClick}
-					className="text-2xl md:hidden hover:text-gray-700 dark:hover:text-gray-200 hover:rounded-full hover:bg-gray-100 size-10 flex justify-center items-center"
+					className="text-2xl md:hidden hover:text-gray-700 dark:hover:text-gray-200 hover:rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 size-10 flex justify-center items-center"
 					aria-label="Back"
 				>
 					<div className="text-md text-blue-500">

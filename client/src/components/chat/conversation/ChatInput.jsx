@@ -259,7 +259,7 @@ export default function ChatInput() {
 			);
 		}
 
-		return <div className="text-xs text-gray-500">Unsupported</div>;
+		return <div className="text-xs text-gray-500 dark:text-gray-300">Unsupported</div>;
 	};
 
 	useEffect(() => {
@@ -285,7 +285,7 @@ export default function ChatInput() {
 					<>
 						<button
 							type="button"
-							className="text-xl text-blue-500 size-10 hover:bg-gray-100 rounded-full flex justify-center items-center"
+							className="text-xl text-blue-500 size-10 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full flex justify-center items-center"
 							onClick={handleMediaAttachmentTrigger}
 						>
 							<FaRegImage />
@@ -296,7 +296,7 @@ export default function ChatInput() {
 
 				{/* Chat Message Input */}
 				<div
-					className="flex-1 rounded-2xl flex flex-col overflow-hidden bg-gray-100"
+					className="flex-1 rounded-2xl flex flex-col overflow-hidden bg-gray-100 dark:bg-gray-800"
 				>
 					{/* Media Attachments Preview */}
 					<div className={`w-full h-24 flex gap-4 p-4 ${isEmpty(selectedMediaAttachments) && "hidden"}`}>
@@ -305,7 +305,7 @@ export default function ChatInput() {
 								<>
 									<button
 										type="button"
-										className="relative size-12 rounded-xl bg-gray-200 flex justify-center items-center"
+										className="relative size-12 rounded-xl bg-gray-200 dark:bg-gray-700 flex justify-center items-center"
 										onClick={handleMediaAttachmentTrigger}
 									>
 										<LuCopyPlus className="text-3xl" />
@@ -317,7 +317,7 @@ export default function ChatInput() {
 											<button
 												type="button"
 												onClick={() => handleRemoveMedia(media.id)}
-												className="size-7 rounded-full border border-gray-300 bg-gray-50 absolute -top-2.5 -right-2.5 flex justify-center items-center"
+												className="size-7 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 absolute -top-2.5 -right-2.5 flex justify-center items-center"
 											>
 												<RxCross2 className="text-xs" />
 											</button>
@@ -335,13 +335,13 @@ export default function ChatInput() {
 						placeholder="Aa"
 						value={message}
 						onChange={(e) => setMessage(e.target.value)}
-						className="focus:outline-none h-9 flex items-center w-full rounded-2xl px-3"
+						className="focus:outline-none h-9 flex items-center w-full rounded-2xl px-3 bg-transparent"
 					/>
 				</div>
 
 				<button
 					type="submit"
-					className="size-10 rounded-full flex items-center justify-center text-blue-500 text-xl hover:bg-gray-100"
+					className="size-10 rounded-full flex items-center justify-center text-blue-500 text-xl hover:bg-gray-100 dark:hover:bg-gray-800"
 				>
 					{isEmpty(message) && isEmpty(selectedMediaAttachments) ? <FaThumbsUp /> : <HiPaperAirplane />}
 				</button>

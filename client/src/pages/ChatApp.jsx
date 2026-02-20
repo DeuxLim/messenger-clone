@@ -43,7 +43,7 @@ export default function ChatApp() {
     };
 
     return (
-        <div className="h-screen flex flex-col bg-gray-100">
+        <div className="h-screen flex flex-col bg-gray-100 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
             <div className="w-full">
                 {currentUser && !currentUser?.isVerified && (
                     <div className="w-full bg-blue-500 flex items-center justify-center p-2 gap-4 h-12">
@@ -70,7 +70,7 @@ export default function ChatApp() {
                     </div>
                 )}
             </div>
-            <div className="flex h-full py-4 px-2 bg-gray-100 gap-4">
+            <div className="flex h-full py-4 px-2 bg-gray-100 dark:bg-gray-950 gap-4">
 
                 <IconMenu />
 

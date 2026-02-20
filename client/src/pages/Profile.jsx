@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import defaultUserImage from "../assets/images/default-user.png"
 import useAuth from "../contexts/auth/useAuth";
 import useToast from "../contexts/ui/useToast";
+import ThemeToggle from "../components/common/ThemeToggle";
 
 export default function Profile() {
 	const {
@@ -130,7 +131,7 @@ export default function Profile() {
 	// ---------------- UI ----------------
 
 	return (
-		<div className="min-h-screen bg-gray-50 p-6 md:p-10">
+		<div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 p-6 md:p-10">
 			<div className="max-w-4xl mx-auto space-y-8">
 				{/* Header */}
 				<div className="flex items-center justify-between">
@@ -141,21 +142,24 @@ export default function Profile() {
 						</p>
 					</div>
 
-					<button
-						onClick={() => navigate(-1)}
-						className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100"
-					>
-						<IoMdArrowBack />
-						Back
-					</button>
+					<div className="flex items-center gap-3">
+						<ThemeToggle compact />
+						<button
+							onClick={() => navigate(-1)}
+							className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
+						>
+							<IoMdArrowBack />
+							Back
+						</button>
+					</div>
 				</div>
 
 				{/* Profile Card */}
-				<div className="bg-white rounded-2xl shadow-sm border border-gray-200">
+				<div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
 					{/* Avatar */}
-					<div className="flex flex-col items-center gap-4 border-b border-gray-300 p-8">
+					<div className="flex flex-col items-center gap-4 border-b border-gray-300 dark:border-gray-700 p-8">
 						<div className="relative">
-							<div className="size-32 rounded-full overflow-hidden ring-4 ring-gray-100">
+							<div className="size-32 rounded-full overflow-hidden ring-4 ring-gray-100 dark:ring-gray-700">
 								<img
 									src={previewImg || defaultUserImage}
 									alt="Profile"
@@ -180,7 +184,7 @@ export default function Profile() {
 							<h2 className="text-xl font-semibold">
 								{formData.firstName} {formData.lastName}
 							</h2>
-							<p className="text-sm text-gray-500">@{formData.userName}</p>
+							<p className="text-sm text-gray-500 dark:text-gray-400">@{formData.userName}</p>
 						</div>
 					</div>
 
@@ -193,7 +197,7 @@ export default function Profile() {
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 							{Object.entries(editableFields).map(([key, label]) => (
 								<div key={key} className="space-y-1">
-									<label className="text-sm font-medium text-gray-600">
+									<label className="text-sm font-medium text-gray-600 dark:text-gray-400">
 										{label}
 									</label>
 
@@ -203,10 +207,10 @@ export default function Profile() {
 											onChange={(e) =>
 												handleChange(key, e.target.value)
 											}
-											className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
+											className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 focus:ring-2 focus:ring-black focus:outline-none"
 										/>
 									) : (
-										<div className="px-3 py-2 bg-gray-50 rounded-lg">
+										<div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
 											{formData[key] || "—"}
 										</div>
 									)}
@@ -216,7 +220,7 @@ export default function Profile() {
 					</div>
 
 					{/* Profile Actions */}
-					<div className="flex justify-end gap-3 border-t border-gray-300 p-6">
+					<div className="flex justify-end gap-3 border-t border-gray-300 dark:border-gray-700 p-6">
 						{!isEditMode ? (
 							<button
 								onClick={() => setIsEditMode(true)}
@@ -229,7 +233,7 @@ export default function Profile() {
 							<>
 								<button
 									onClick={handleCancelProfileEdit}
-									className="px-5 py-2.5 rounded-lg border border-gray-300"
+									className="px-5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600"
 								>
 									Cancel
 								</button>
@@ -245,13 +249,13 @@ export default function Profile() {
 				</div>
 
 				{/* Password Section */}
-				<div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+				<div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
 					<h3 className="text-lg font-semibold mb-4">Security</h3>
 
 					{!showPasswordForm ? (
 						<button
 							onClick={() => setShowPasswordForm(true)}
-							className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+							className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
 						>
 							Change Password
 						</button>
@@ -267,7 +271,7 @@ export default function Profile() {
 										currentPassword: e.target.value,
 									})
 								}
-								className="w-full border rounded-lg px-3 py-2"
+								className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg px-3 py-2"
 							/>
 
 							<input
@@ -280,7 +284,7 @@ export default function Profile() {
 										newPassword: e.target.value,
 									})
 								}
-								className="w-full border rounded-lg px-3 py-2"
+								className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg px-3 py-2"
 							/>
 
 							<input
@@ -293,13 +297,13 @@ export default function Profile() {
 										confirmPassword: e.target.value,
 									})
 								}
-								className="w-full border rounded-lg px-3 py-2"
+								className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg px-3 py-2"
 							/>
 
 							<div className="flex gap-3">
 								<button
 									onClick={() => setShowPasswordForm(false)}
-									className="px-4 py-2 rounded-lg border"
+									className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600"
 								>
 									Cancel
 								</button>

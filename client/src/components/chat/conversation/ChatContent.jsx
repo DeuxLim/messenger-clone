@@ -88,7 +88,7 @@ export default function ChatContent() {
                             <div
                                 key={m._id}
                                 data-message-id={m._id}
-                                className="text-center text-xs text-gray-500 mt-4"
+                                className="text-center text-xs text-gray-500 dark:text-gray-400 mt-4"
                             >
                                 {m.text}
                             </div>
@@ -127,7 +127,7 @@ export default function ChatContent() {
                                     </div>
                                 </div>
 
-                                <div className="px-3 py-1.5 bg-white text-sm text-gray-400">
+                                <div className="px-3 py-1.5 bg-white dark:bg-gray-800 text-sm text-gray-400 dark:text-gray-300">
                                     typing...
                                 </div>
                             </div>

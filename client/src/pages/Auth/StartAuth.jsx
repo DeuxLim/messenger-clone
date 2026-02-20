@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { useEffect } from 'react';
 import { FaFacebookMessenger } from "react-icons/fa6";
 import useAuth from '../../contexts/auth/useAuth';
+import ThemeToggle from '../../components/common/ThemeToggle';
 
 export default function StartAuth() {
 	const { authStatus, currentUser } = useAuth();
@@ -17,7 +18,11 @@ export default function StartAuth() {
 	}, [authStatus, navigate, currentUser]);
 
 	return (
-		<div className="min-h-screen m-0 bg-white flex flex-col justify-center items-center">
+		<div className="relative min-h-screen m-0 bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100 flex flex-col justify-center items-center">
+			<div className="absolute top-4 right-4">
+				<ThemeToggle compact />
+			</div>
+
 			<div className='flex flex-col justify-center h-full items-center p-10 w-full flex-1'>
 
 				{/* Logo, Name, Tagline */}
@@ -26,7 +31,7 @@ export default function StartAuth() {
 						<FaFacebookMessenger className='text-blue-600 text-7xl' />
 					</div>
 					{(isLoggingIn || isRegistering) && (
-						<span className='font-light text-4xl'>
+						<span className='font-light text-4xl text-center'>
 							Connect with your favorite people.
 						</span>
 					)}

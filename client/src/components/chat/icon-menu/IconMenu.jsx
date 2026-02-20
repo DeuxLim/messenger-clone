@@ -9,6 +9,7 @@ import { Link, useLocation } from "react-router";
 import IconMenuSkeleton from "./IconMenuSkeleton";
 import useAuth from "../../../contexts/auth/useAuth";
 import useSocket from "../../../contexts/socket/useSocket";
+import ThemeToggle from "../../common/ThemeToggle";
 
 export default function IconMenu() {
     const [isIconMenuExpanded, setIsIconMenuExpanded] = useToggle(false);
@@ -39,7 +40,7 @@ export default function IconMenu() {
             {/* Menu Items */}
             <div className="flex-1 flex flex-col">
                 {/* Chats Menu */}
-                <div className={`${isChatsPage && "bg-gray-200 rounded-lg"} flex justify-center items-center w-full gap-2.5 px-2.5 py-2.5`}>
+                <div className={`${isChatsPage && "bg-gray-200 dark:bg-gray-700 rounded-lg"} flex justify-center items-center w-full gap-2.5 px-2.5 py-2.5`}>
                     <TbMessageCircleFilled className="text-2xl" />
                     {isIconMenuExpanded && <div className="flex-1 text-sm  w-46">Chats</div>}
                 </div>
@@ -96,12 +97,16 @@ export default function IconMenu() {
                                 </span>
                                 <span className="text-sm">Log out</span>
                             </button>
+
+                            <div className="p-2">
+                                <ThemeToggle className="w-full justify-center" />
+                            </div>
                         </div>
                     )}
                 </div>
 
                 {/* Toggle Menu */}
-                <button onClick={setIsIconMenuExpanded} className="size-9 rounded-full bg-gray-200 md:flex justify-center items-center hidden">
+                <button onClick={setIsIconMenuExpanded} className="size-9 rounded-full bg-gray-200 dark:bg-gray-700 md:flex justify-center items-center hidden">
                     <BiFoodMenu className="text-xl" />
                 </button>
             </div>

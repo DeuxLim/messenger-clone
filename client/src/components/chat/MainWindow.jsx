@@ -19,7 +19,7 @@ export default function MainWindow() {
     return (
         <>
             {(isDesktop || (!isDesktop && !isChatSettingsOpen)) && (
-                <main className="flex-1 h-full shadow-sm overflow-hidden bg-white rounded-xl w-full">
+                <main className="flex-1 h-full shadow-sm overflow-hidden bg-white dark:bg-gray-900 rounded-xl w-full">
                     <Outlet />
                 </main>
             )}
