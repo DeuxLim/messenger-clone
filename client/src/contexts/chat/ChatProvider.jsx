@@ -4,10 +4,13 @@ import { isEmpty } from "../../utilities/utils.js";
 import useAuth from "../auth/useAuth.js";
 import useSocket from "../socket/useSocket.js";
 import { loadChatOverview } from "../../services/chats.service.js";
+import useChatSearch from "./ChatSearch/useChatSearch.js";
 
 export default function ChatProvider({ children }) {
     const { token, currentUser } = useAuth();
     const { socket } = useSocket();
+    const chatSearch = useChatSearch();
+    const isSearch = chatSearch?.isSearch ?? false;
     const isReady = Boolean(token && socket);
 
     // ---- Chat States ----
@@ -16,20 +19,8 @@ export default function ChatProvider({ children }) {
     const [selectedMediaAttachments, setSelectedMediaAttachments] = useState([]);
     const [chatItems, setChatItems] = useState([]);
     const [userItems, setUserItems] = useState([]);
-    const [isSearch, setIsSearch] = useState(false);
-    const [searchResults, setSearchResults] = useState({ chats: [], users: [] });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    const updateChatSearchResults = useCallback(
-        ({ chats = [], users = [], isSearch = false }) => {
-            const searchChatsList = (chats || []).map(c => ({ ...c, type: "chat" }));
-            const searchUsersList = (users || []).map(u => ({ ...u, type: "user" }));
-            setSearchResults([...searchChatsList, ...searchUsersList]);
-            setIsSearch(isSearch);
-        },
-        []
-    );
 
     // Consolidated user and chats list for sidebar
     const usersAndChatsList = useMemo(() => {
@@ -220,12 +211,6 @@ export default function ChatProvider({ children }) {
         userItems,
         setUserItems,
         usersAndChatsList,
-        searchResults,
-
-        // presence + search
-        isSearch,
-        setIsSearch,
-        updateChatSearchResults,
 
         // fetching status
         isLoading,
