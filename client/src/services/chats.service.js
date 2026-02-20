@@ -1,5 +1,6 @@
 import {
 	createChatAPI,
+	deleteChatAPI,
 	getChatMessagesAPI,
 	getMessagesAPI,
 	getUserChatsAPI,
@@ -50,4 +51,10 @@ export const getMessages = async (chatId) => {
 			: [];
 
 	return messages;
+};
+
+export const deleteChat = async (chatId) => {
+	if (!chatId) throw new Error("chatId is required");
+
+	return deleteChatAPI(chatId);
 };

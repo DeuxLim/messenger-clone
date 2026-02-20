@@ -9,14 +9,20 @@ import { IoMdArrowBack } from "react-icons/io";
 import { IoMdCheckmark } from "react-icons/io";
 import { useMemo, useState } from 'react';
 import { MdModeEdit } from "react-icons/md";
+import { useNavigate } from "react-router";
 import useAuth from '../../../contexts/auth/useAuth';
 import useChatDisplay from '../../../contexts/chat/ChatDisplay/useChatDisplay';
 import useSocket from '../../../contexts/socket/useSocket';
 import useChatPresence from '../../../contexts/chat/ChatPresence/useChatPresence';
 import useChatSession from '../../../contexts/chat/ChatSession/useChatSession';
+import useChatData from '../../../contexts/chat/ChatData/useChatData';
+import useChatSearch from '../../../contexts/chat/ChatSearch/useChatSearch';
+import { deleteChat } from '../../../services/chats.service';
 
 export default function ChatSettings() {
-    const { activeChatData } = useChatSession();
+    const { activeChatData, clearActiveChat, clearActiveChatMessages } = useChatSession();
+    const { setChatItems, setUserItems } = useChatData();
+    const { updateChatSearchResults } = useChatSearch();
     const { isUserOnline } = useChatPresence();
     const { currentUser } = useAuth();
     const [isCustomizeChatExpanded, setIsCustomizeChatExpanded] = useToggle();
@@ -24,10 +30,13 @@ export default function ChatSettings() {
     const [isNicknameEditModalDisplayed, setIsNicknameEditModalDisplayed] = useToggle();
     const [editingParticipantId, setEditingParticipantId] = useState(null);
     const [isChatNameEditModalDisplayed, setIsChatNameEditModalDisplayed] = useToggle();
+    const [isDeleteChatModalDisplayed, setIsDeleteChatModalDisplayed] = useToggle();
     const [chatName, setChatName] = useState(activeChatData?.chatName || "");
     const { isChatSettingsOpen, setIsChatSettingsOpen } = useChatDisplay();
     const [updatedNickname, setUpdatedNickname] = useState({});
+    const [isDeletingChat, setIsDeletingChat] = useState(false);
     const { socket } = useSocket();
+    const navigate = useNavigate();
 
     const chatParticipants = useOtherParticipants(activeChatData, currentUser._id);
     const isGroup = !!activeChatData?.isGroup;
@@ -87,6 +96,45 @@ export default function ChatSettings() {
     // --- Event Handlers ---
     const handleBackClick = () => {
         setIsChatSettingsOpen(false);
+    };
+
+    const handleDeleteChat = async () => {
+        if (!activeChatData?._id || isDeletingChat) return;
+
+        try {
+            setIsDeletingChat(true);
+            await deleteChat(activeChatData._id);
+
+            setChatItems((prev) =>
+                prev.filter((chat) => chat._id !== activeChatData._id),
+            );
+            // Ensure deleted 1:1 chat user appears in "Your Contacts" immediately.
+            if (!activeChatData?.isGroup) {
+                const otherParticipant = activeChatData?.participants?.find(
+                    (participant) => String(participant?._id) !== String(currentUser?._id),
+                );
+
+                if (otherParticipant?._id) {
+                    setUserItems((prev) => {
+                        const exists = prev.some(
+                            (user) => String(user?._id) === String(otherParticipant._id),
+                        );
+                        if (exists) return prev;
+                        return [otherParticipant, ...prev];
+                    });
+                }
+            }
+            clearActiveChatMessages();
+            clearActiveChat();
+            updateChatSearchResults({ chats: [], users: [], isSearch: false });
+            setIsChatSettingsOpen(false);
+            setIsDeleteChatModalDisplayed(false);
+            navigate("/chats", { replace: true });
+        } catch (error) {
+            console.error("Failed to delete chat:", error);
+        } finally {
+            setIsDeletingChat(false);
+        }
     };
 
     return (
@@ -373,6 +421,59 @@ export default function ChatSettings() {
                             }
                         </>
                     )}
+
+                    <div className='mt-4 border-t border-gray-200 pt-3'>
+                        <button
+                            type='button'
+                            onClick={() => setIsDeleteChatModalDisplayed(true)}
+                            disabled={isDeletingChat}
+                            className='w-full rounded-md p-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60 disabled:cursor-not-allowed'
+                        >
+                            {isDeletingChat ? "Deleting..." : "Delete Chat"}
+                        </button>
+                    </div>
+
+                    <CenterPopUpModal
+                        open={isDeleteChatModalDisplayed}
+                        onClose={() => setIsDeleteChatModalDisplayed(false)}
+                    >
+                        <div className='p-5 w-[420px] flex flex-col gap-4'>
+                            <div className='flex justify-between items-center'>
+                                <div className='font-medium'>Delete Chat</div>
+                                <button
+                                    type='button'
+                                    className='size-7 rounded-full bg-gray-100 text-[12px] font-bold flex justify-center items-center'
+                                    onClick={() => setIsDeleteChatModalDisplayed(false)}
+                                    disabled={isDeletingChat}
+                                >
+                                    X
+                                </button>
+                            </div>
+
+                            <div className='text-sm text-gray-600'>
+                                This will remove the chat from your account. You can restore it later by messaging the user again.
+                            </div>
+
+                            <div className='w-full flex gap-2 pt-1'>
+                                <button
+                                    type='button'
+                                    onClick={() => setIsDeleteChatModalDisplayed(false)}
+                                    disabled={isDeletingChat}
+                                    className='rounded-md text-sm font-medium w-1/2 px-2 py-2 bg-gray-100 disabled:opacity-60'
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type='button'
+                                    onClick={handleDeleteChat}
+                                    disabled={isDeletingChat}
+                                    className='rounded-md text-sm font-medium w-1/2 px-2 py-2 bg-red-500 text-white disabled:opacity-60'
+                                >
+                                    {isDeletingChat ? "Deleting..." : "Delete"}
+                                </button>
+                            </div>
+                        </div>
+                    </CenterPopUpModal>
                 </div>
             </div>
         </div>

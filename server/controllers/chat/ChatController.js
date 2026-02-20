@@ -49,6 +49,20 @@ const findOrCreateChat = async (req, res) => {
 
 			// Return existing chat
 			if (existingChat) {
+				if (
+					Array.isArray(existingChat.deletedFor) &&
+					existingChat.deletedFor.some(
+						(userId) => String(userId) === String(currentUser._id),
+					)
+				) {
+					await Chat.findByIdAndUpdate(existingChat._id, {
+						$pull: { deletedFor: currentUser._id },
+					});
+					existingChat.deletedFor = existingChat.deletedFor.filter(
+						(userId) => String(userId) !== String(currentUser._id),
+					);
+				}
+
 				return res.status(200).json({
 					message: "chat exists",
 					data: {
@@ -75,6 +89,21 @@ const findOrCreateChat = async (req, res) => {
 
 			// Return existing chat
 			if (existingChatByUser) {
+				if (
+					Array.isArray(existingChatByUser.deletedFor) &&
+					existingChatByUser.deletedFor.some(
+						(userId) => String(userId) === String(currentUser._id),
+					)
+				) {
+					await Chat.findByIdAndUpdate(existingChatByUser._id, {
+						$pull: { deletedFor: currentUser._id },
+					});
+					existingChatByUser.deletedFor =
+						existingChatByUser.deletedFor.filter(
+							(userId) => String(userId) !== String(currentUser._id),
+						);
+				}
+
 				return res.status(200).json({
 					message: "chat exists",
 					data: {
@@ -99,6 +128,53 @@ const findOrCreateChat = async (req, res) => {
 			chatParticipantsIds = [id, currentUser._id];
 		} else {
 			chatParticipantsIds = req.body.participants.map((p) => p._id);
+
+			// For new-message flow (id === null), reuse existing 1:1 chat if present
+			if (chatParticipantsIds.length === 2) {
+				let existingChatByParticipants = await Chat.findOne({
+					isGroup: false,
+					participants: { $all: chatParticipantsIds, $size: 2 },
+				})
+					.populate(
+						"participants",
+						"_id fullName userName firstName lastName email isOnline lastSeen profilePicture",
+					)
+					.populate("lastMessage");
+
+				if (existingChatByParticipants) {
+					if (
+						Array.isArray(existingChatByParticipants.deletedFor) &&
+						existingChatByParticipants.deletedFor.some(
+							(userId) => String(userId) === String(currentUser._id),
+						)
+					) {
+						await Chat.findByIdAndUpdate(existingChatByParticipants._id, {
+							$pull: { deletedFor: currentUser._id },
+						});
+						existingChatByParticipants.deletedFor =
+							existingChatByParticipants.deletedFor.filter(
+								(userId) => String(userId) !== String(currentUser._id),
+							);
+					}
+
+					const existingChatObject =
+						existingChatByParticipants.toObject
+							? existingChatByParticipants.toObject()
+							: existingChatByParticipants;
+
+					const finalChat = clientTempChatId
+						? { ...existingChatObject, clientTempChatId }
+						: existingChatObject;
+
+					return res.status(200).json({
+						message: "chat exists",
+						data: {
+							isNew: false,
+							chat: finalChat,
+						},
+					});
+				}
+			}
 		}
 
 		const isMultipleParticipants = chatParticipantsIds.length > 2;
@@ -149,6 +225,7 @@ const getUserChats = async (req, res) => {
 
 	const existingChats = await Chat.find({
 		participants: currentUser._id,
+		deletedFor: { $ne: currentUser._id },
 	})
 		.populate("participants")
 		.populate({
@@ -162,12 +239,23 @@ const getUserChats = async (req, res) => {
 
 	const chatsWithUnreadCount = await Promise.all(
 		chats.map(async (chat) => {
-			const unreadCount = await Message.countDocuments({
+			const clearAt =
+				chat?.clearedAtBy?.get?.(String(currentUser._id)) ||
+				chat?.clearedAtBy?.[String(currentUser._id)] ||
+				null;
+
+			const unreadQuery = {
 				chat: chat._id,
 				sender: { $ne: currentUser._id },
 				isSeen: false,
 				type: "user",
-			});
+			};
+
+			if (clearAt) {
+				unreadQuery.createdAt = { $gte: clearAt };
+			}
+
+			const unreadCount = await Message.countDocuments(unreadQuery);
 
 			return {
 				...chat,
@@ -181,7 +269,28 @@ const getUserChats = async (req, res) => {
 
 const getChatMessages = async (req, res) => {
 	try {
-		const messages = await Message.find({ chat: req.params.id })
+		const currentUser = await User.findOne({ email: req.user.email });
+		const chat = await Chat.findOne({
+			_id: req.params.id,
+			participants: currentUser._id,
+			deletedFor: { $ne: currentUser._id },
+		});
+		if (!chat) {
+			return res.status(404).json({
+				error: "Chat not found",
+			});
+		}
+
+		const clearAt = chat?.clearedAtBy?.get
+			? chat.clearedAtBy.get(String(currentUser._id))
+			: null;
+
+		const messageQuery = { chat: req.params.id };
+		if (clearAt) {
+			messageQuery.createdAt = { $gte: clearAt };
+		}
+
+		const messages = await Message.find(messageQuery)
 			.populate("chat")
 			.populate("sender");
 
@@ -227,6 +336,7 @@ const searchChat = async (req, res) => {
 		const chats = await Chat.find({
 			participants: currentUserId,
 			isGroup: false,
+			deletedFor: { $ne: currentUserId },
 		})
 			.populate({
 				path: "participants",
@@ -304,6 +414,48 @@ const updateChat = async (req, res) => {
 	}
 };
 
+const deleteChat = async (req, res) => {
+	try {
+		const chatId = req.params.id;
+		const currentUser = await User.findOne({ email: req.user.email });
+
+		if (!currentUser?._id) {
+			return res.status(401).json({
+				deleteSuccess: false,
+				message: "Unauthorized",
+			});
+		}
+
+		const chat = await Chat.findOne({
+			_id: chatId,
+			participants: currentUser._id,
+		});
+
+		if (!chat) {
+			return res.status(404).json({
+				deleteSuccess: false,
+				message: "Chat not found",
+			});
+		}
+
+		await Chat.findByIdAndUpdate(chatId, {
+			$addToSet: { deletedFor: currentUser._id },
+			$set: { [`clearedAtBy.${currentUser._id}`]: new Date() },
+		});
+
+		return res.status(200).json({
+			deleteSuccess: true,
+			chatId,
+		});
+	} catch (error) {
+		console.error("Error deleting chat:", error);
+		return res.status(500).json({
+			deleteSuccess: false,
+			message: "Server error while deleting chat.",
+		});
+	}
+};
+
 export default {
 	findOrCreateChat,
 	getUserChats,
@@ -311,4 +463,5 @@ export default {
 	addChatMessage,
 	searchChat,
 	updateChat,
+	deleteChat,
 };

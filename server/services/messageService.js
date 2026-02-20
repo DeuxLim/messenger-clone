@@ -16,6 +16,14 @@ export const addMessageToChat = async ({
 	const chat = await Chat.findById(chatId);
 	if (!chat) throw new Error("Chat not found");
 
+	// If a new user message is sent, restore this chat for participants
+	// who previously soft-deleted it.
+	if (type === "user") {
+		await Chat.findByIdAndUpdate(chat._id, {
+			$pull: { deletedFor: { $in: chat.participants } },
+		});
+	}
+
 	// Handle media attachments
 	let uploadedFiles = [];
 

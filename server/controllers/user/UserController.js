@@ -25,6 +25,7 @@ const suggested = async (req, res) => {
 		const existingChats = (
 			await Chat.find({
 				participants: currentUserId,
+				deletedFor: { $ne: currentUserId },
 			})
 				.select("participants")
 				.populate("lastMessage")
@@ -39,7 +40,12 @@ const suggested = async (req, res) => {
 		);
 
 		// Find users NOT in that list
-		const suggestedUsers = await User.find({})
+		const suggestedUsers = await User.find({
+			_id: {
+				$ne: currentUserId,
+				$nin: chattedUserIds,
+			},
+		})
 			.select(
 				"fullName firstName lastName userName profilePicture bio isOnline lastSeen",
 			)

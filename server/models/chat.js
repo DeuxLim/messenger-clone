@@ -69,6 +69,13 @@ const chatSchema = new mongoose.Schema(
 			},
 		],
 
+		// Per-user chat clear cutoff timestamp
+		clearedAtBy: {
+			type: Map,
+			of: Date, // userId -> clear timestamp
+			default: {},
+		},
+
 		// Audit
 		updatedBy: {
 			type: mongoose.Schema.Types.ObjectId,

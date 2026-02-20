@@ -19,3 +19,7 @@ export const createChatAPI = ({ id, participants, chatName, clientTempChatId}) =
 export const getMessagesAPI = (chatId) => {
 	return fetchAPI.get(`/chats/${chatId}`);
 };
+
+export const deleteChatAPI = (chatId) => {
+	return fetchAPI.delete(`/chats/${chatId}`);
+};

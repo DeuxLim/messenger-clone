@@ -9,5 +9,6 @@ router.get("/search", ChatController.searchChat);
 router.get("/:id", ChatController.getChatMessages);
 router.post("/:id/messages", ChatController.addChatMessage);
 router.patch("/:id", ChatController.updateChat);
+router.delete("/:id", ChatController.deleteChat);
 
 export default router;
