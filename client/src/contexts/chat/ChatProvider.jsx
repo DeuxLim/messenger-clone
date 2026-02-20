@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import ChatContext from "./ChatContext.js";
 import { isEmpty } from "../../utilities/utils.js";
 import useAuth from "../auth/useAuth.js";
@@ -7,7 +7,7 @@ import { loadChatOverview } from "../../services/chats.service.js";
 
 export default function ChatProvider({ children }) {
     const { token, currentUser } = useAuth();
-    const { socket, socketStatus } = useSocket();
+    const { socket } = useSocket();
     const isReady = Boolean(token && socket);
 
     // ---- Chat States ----
@@ -124,99 +124,6 @@ export default function ChatProvider({ children }) {
         setActiveChatMessages([]);
     }, [setActiveChatMessages]);
 
-    // ---- Socket Presence ----
-    useEffect(() => {
-        if (!socket || socketStatus !== "connected") return;
-
-        // 1. append to activeChatMessages
-        // 2. update activeChatData.lastMessage
-        // 3. update chatItems (move chat to top, update preview)
-        // 4. remove messaged user from suggested list
-        socket.on("receiveMessage", ({ tempMessageId, message }) => {
-            setActiveChatMessages((prev) => {
-                const safePrev = Array.isArray(prev) ? prev : [];
-
-                const activeChatId = activeChatDataRef.current?._id;
-                if (!activeChatId || message?.chat?._id !== activeChatId) {
-                    return safePrev;
-                }
-
-                // 1) Try replacing optimistic message (sender case)
-                if (tempMessageId) {
-                    let replaced = false;
-
-                    const updated = safePrev.map((m) => {
-                        if (m._id === tempMessageId) {
-                            replaced = true;
-                            return { ...message, status: "sent" };
-                        }
-                        return m;
-                    });
-
-                    if (replaced) return updated;
-                    // else → receiver path, fall through to append
-                }
-
-                // 2) Prevent duplicates
-                const exists = safePrev.some((m) => m._id === message._id);
-                if (exists) return safePrev;
-
-                // 3) Append new message (receiver or fallback)
-                return [...safePrev, message];
-            });
-
-            // --- Update active chat lastMessage ---
-            setActiveChatData((prev) => {
-                if (!prev || prev._id !== message?.chat?._id) return prev;
-                return { ...prev, lastMessage: message };
-            });
-
-            // --- Update chat list + move chat to top ---
-            setChatItems((prev) => {
-                const exists = prev.some((chat) => chat?._id === message?.chat?._id);
-                let updatedChats;
-
-                if (exists) {
-                    const updated = prev.map((chat) =>
-                        chat?._id === message?.chat?._id ? { ...message.chat } : chat
-                    );
-
-                    const movedChat = updated.find(
-                        (chat) => chat?._id === message?.chat?._id
-                    );
-
-                    updatedChats = [
-                        movedChat,
-                        ...updated.filter((chat) => chat?._id !== message?.chat?._id),
-                    ];
-                } else {
-                    updatedChats = [message.chat, ...prev];
-                }
-
-                return updatedChats;
-            });
-
-            // --- Remove messaged user from suggested users ---
-            setUserItems((prev) => {
-                if (!message?.chat || !Array.isArray(message?.chat?.participants)) return prev;
-
-                const otherUser = message.chat.participants.find(
-                    (p) => String(p?._id) !== String(message.sender?._id)
-                );
-
-                if (!otherUser) return prev;
-
-                return prev.filter(
-                    (user) => String(user?._id) !== String(otherUser?._id)
-                );
-            });
-        });
-
-        return () => {
-            socket.off("receiveMessage");
-        };
-    }, [socket, socketStatus]);
-
     const addOptimisticMessage = (message, targetChat) => {
         if (!targetChat) return;
 
@@ -264,43 +171,6 @@ export default function ChatProvider({ children }) {
             );
         });
     };
-
-    /* ----- HANDLE MESSAGE SEEN STATUS ----  */
-    const activeChatDataRef = useRef(activeChatData);
-    useEffect(() => {
-        activeChatDataRef.current = activeChatData;
-    }, [activeChatData]);
-
-    useEffect(() => {
-        if (!socket || socketStatus !== "connected") return;
-
-        const handleSeenUpdate = ({ chatId, seenMessages }) => {
-            // Update chatItems (sidebar) - this should ALWAYS run
-            setChatItems(prev =>
-                prev.map(chat => {
-                    if (chat._id === chatId && chat.lastMessage && seenMessages.includes(chat.lastMessage._id)) {
-                        return { ...chat, lastMessage: { ...chat.lastMessage, isSeen: true } };
-                    }
-                    return chat;
-                })
-            );
-
-            // Only update active chat messages if we're viewing this chat
-            if (activeChatDataRef.current?._id === chatId) {
-                setActiveChatMessages(prev =>
-                    prev.map(message =>
-                        seenMessages.includes(message._id)
-                            ? { ...message, isSeen: true }
-                            : message
-                    )
-                );
-            }
-        };
-
-        socket.on("messages:seenUpdate", handleSeenUpdate);
-        return () => socket.off("messages:seenUpdate", handleSeenUpdate);
-    }, [socket, socketStatus]);
-    /* ----- HANDLE MESSAGE SEEN STATUS ----  */
 
     // ---- Fetch Chats + Suggested Users ----
     useEffect(() => {
