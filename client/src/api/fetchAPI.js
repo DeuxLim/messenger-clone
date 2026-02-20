@@ -70,7 +70,8 @@ async function fetchClient(
 
 	try {
 		const response = await fetch(`${BASE_URL}${endpoint}`, config);
-		const isUnauthorized = response.status === 401 || response.status === 403;
+		const isUnauthorized =
+			response.status === 401 || response.status === 403;
 		const canRetryWithRefresh =
 			isUnauthorized && retry && !endpoint.startsWith("/auth/refresh");
 

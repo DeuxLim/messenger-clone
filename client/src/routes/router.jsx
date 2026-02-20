@@ -7,9 +7,12 @@ const lazyComponent = (importer) =>
         return { Component: module.default };
     };
 
+const routeHydrateFallback = <></>;
+
 export const routes = createBrowserRouter([
     {
         path: "/auth",
+        hydrateFallbackElement: routeHydrateFallback,
         errorElement: <RouteErrorBoundary />,
         lazy: lazyComponent(() => import("../pages/Auth/StartAuth")),
         children: [
@@ -22,11 +25,13 @@ export const routes = createBrowserRouter([
         ],
     },
     {
+        hydrateFallbackElement: routeHydrateFallback,
         errorElement: <RouteErrorBoundary />,
         lazy: lazyComponent(() => import("../components/ProtectedRoute")),
         children: [
             {
                 path: "/chats",
+                hydrateFallbackElement: routeHydrateFallback,
                 errorElement: <RouteErrorBoundary />,
                 lazy: lazyComponent(() => import("./ChatsAppShell")),
                 children: [
