@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router";
 import useSocket from "../../socket/useSocket";
 import ChatDisplayContext from "./ChatDisplayContext";
 
@@ -8,6 +9,7 @@ export default function ChatDisplayProvider({ children }) {
 	const [isDesktop, setIsDesktop] = useState(false);
 	const [isChatSettingsOpen, setIsChatSettingsOpen] = useState(false);
 	const { socket, socketStatus } = useSocket();
+	const { pathname } = useLocation();
 
 	useEffect(() => {
 		if (!socket || socketStatus !== "connected") return;
@@ -42,6 +44,11 @@ export default function ChatDisplayProvider({ children }) {
 		desktopQuery.addEventListener("change", updateLayout);
 		return () => desktopQuery.removeEventListener("change", updateLayout);
 	}, []);
+
+	useEffect(() => {
+		if (pathname !== "/chats/new" || !isChatSettingsOpen) return;
+		setIsChatSettingsOpen(false);
+	}, [pathname, isChatSettingsOpen]);
 
 	const data = {
 		typingChats, setTypingChats,
