@@ -1,33 +1,17 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import ChatContext from "./ChatContext.js";
 import { isEmpty } from "../../utilities/utils.js";
 import useAuth from "../auth/useAuth.js";
-import useSocket from "../socket/useSocket.js";
-import { loadChatOverview } from "../../services/chats.service.js";
-import useChatSearch from "./ChatSearch/useChatSearch.js";
+import useChatData from "./ChatData/useChatData.js";
 
 export default function ChatProvider({ children }) {
-    const { token, currentUser } = useAuth();
-    const { socket } = useSocket();
-    const chatSearch = useChatSearch();
-    const isSearch = chatSearch?.isSearch ?? false;
-    const isReady = Boolean(token && socket);
+    const { currentUser } = useAuth();
+    const chatData = useChatData();
 
     // ---- Chat States ----
     const [activeChatData, setActiveChatData] = useState(null);
     const [activeChatMessages, setActiveChatMessages] = useState([]);
     const [selectedMediaAttachments, setSelectedMediaAttachments] = useState([]);
-    const [chatItems, setChatItems] = useState([]);
-    const [userItems, setUserItems] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    // Consolidated user and chats list for sidebar
-    const usersAndChatsList = useMemo(() => {
-        const chats = (chatItems || []).map(c => ({ ...c, type: "chat" }));
-        const users = (userItems || []).map(u => ({ ...u, type: "user" }));
-        return [...chats, ...users];
-    }, [chatItems, userItems]);
 
     const createEmptyTempChat = (participants = []) => {
         return {
@@ -115,6 +99,16 @@ export default function ChatProvider({ children }) {
         setActiveChatMessages([]);
     }, [setActiveChatMessages]);
 
+    const {
+        chatItems,
+        setChatItems,
+        userItems,
+        setUserItems,
+        usersAndChatsList,
+        isLoading,
+        error,
+    } = chatData || {};
+
     const addOptimisticMessage = (message, targetChat) => {
         if (!targetChat) return;
 
@@ -162,32 +156,6 @@ export default function ChatProvider({ children }) {
             );
         });
     };
-
-    // ---- Fetch Chats + Suggested Users ----
-    useEffect(() => {
-        if (!isReady || isSearch) return;
-
-        const fetchChatData = async () => {
-            setIsLoading(true);
-            setError(null);
-
-            try {
-                const { chats, users } = await loadChatOverview();
-
-                setChatItems(chats);
-                setUserItems(users);
-            } catch (err) {
-                console.error("Error fetching chats:", err);
-                setError("Failed to load chats. Please try again.");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        if (isEmpty(usersAndChatsList)) {
-            fetchChatData();
-        }
-    }, [isReady, isSearch, usersAndChatsList]);
 
     // ---- Context Value ----
     const values = {
