@@ -16,6 +16,7 @@ export default function ChatApp() {
     const toast = useToast();
     const location = useLocation();
     const isRoot = location.pathname === "/chats";
+    const isMobileBottomNavRoute = location.pathname === "/chats" || location.pathname === "/chats/new";
 
     const [resendMessage, setResendMessage] = useState(null);
     const [resendSuccess, setResendSuccess] = useState(null);
@@ -70,7 +71,7 @@ export default function ChatApp() {
                     </div>
                 )}
             </div>
-            <div className="flex h-full py-4 px-2 bg-gray-100 dark:bg-gray-950 gap-4">
+            <div className={`flex h-full px-2 pt-4 ${!isDesktop && isMobileBottomNavRoute ? "pb-24" : "pb-4"} md:py-4 md:pb-4 bg-gray-100 dark:bg-gray-950 gap-4`}>
 
                 <IconMenu />
 

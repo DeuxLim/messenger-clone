@@ -30,41 +30,48 @@ export const routes = createBrowserRouter([
         lazy: lazyComponent(() => import("../components/ProtectedRoute")),
         children: [
             {
-                path: "/chats",
                 hydrateFallbackElement: routeHydrateFallback,
                 errorElement: <RouteErrorBoundary />,
-                lazy: lazyComponent(() => import("./ChatsAppShell")),
+                lazy: lazyComponent(() => import("./ChatProvidersShell")),
                 children: [
                     {
-                        path: "",
-                        lazy: lazyComponent(() => import("../components/chat/MainWindow")),
+                        path: "/chats",
+                        hydrateFallbackElement: routeHydrateFallback,
+                        errorElement: <RouteErrorBoundary />,
+                        lazy: lazyComponent(() => import("../pages/ChatApp")),
                         children: [
-                            { index: true, lazy: lazyComponent(() => import("../components/chat/start/Start")) },
                             {
-                                path: ":chatId",
-                                lazy: lazyComponent(() => import("../components/chat/conversation/ChatLayout")),
+                                path: "",
+                                lazy: lazyComponent(() => import("../components/chat/MainWindow")),
                                 children: [
-                                    { index: true, lazy: lazyComponent(() => import("../components/chat/conversation/ChatWindow")) },
+                                    { index: true, lazy: lazyComponent(() => import("../components/chat/start/Start")) },
+                                    {
+                                        path: ":chatId",
+                                        lazy: lazyComponent(() => import("../components/chat/conversation/ChatLayout")),
+                                        children: [
+                                            { index: true, lazy: lazyComponent(() => import("../components/chat/conversation/ChatWindow")) },
+                                        ],
+                                    },
+                                    {
+                                        path: "new",
+                                        lazy: lazyComponent(() => import("../components/chat/conversation/ChatLayout")),
+                                        children: [
+                                            { index: true, lazy: lazyComponent(() => import("../components/chat/conversation/ChatWindow")) },
+                                        ],
+                                    },
+                                    {
+                                        path: "*",
+                                        element: <Navigate to="." replace />,
+                                    },
                                 ],
-                            },
-                            {
-                                path: "new",
-                                lazy: lazyComponent(() => import("../components/chat/conversation/ChatLayout")),
-                                children: [
-                                    { index: true, lazy: lazyComponent(() => import("../components/chat/conversation/ChatWindow")) },
-                                ],
-                            },
-                            {
-                                path: "*",
-                                element: <Navigate to="." replace />,
                             },
                         ],
                     },
+                    {
+                        path: "/profile",
+                        lazy: lazyComponent(() => import("../pages/Profile")),
+                    },
                 ],
-            },
-            {
-                path: "/profile",
-                lazy: lazyComponent(() => import("../pages/Profile")),
             },
         ],
     },

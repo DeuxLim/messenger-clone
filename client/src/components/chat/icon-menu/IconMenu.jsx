@@ -31,11 +31,15 @@ export default function IconMenu() {
 
     // ✅ Skeleton state
     if (!isAppReady) {
-        return <IconMenuSkeleton expanded={isIconMenuExpanded} />;
+        return (
+            <div className="hidden md:flex">
+                <IconMenuSkeleton expanded={isIconMenuExpanded} />
+            </div>
+        );
     }
 
     return (
-        <div className="flex justify-center items-center flex-col pl-2">
+        <div className="hidden md:flex justify-center items-center flex-col pl-2">
 
             {/* Menu Items */}
             <div className="flex-1 flex flex-col">

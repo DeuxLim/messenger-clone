@@ -131,7 +131,7 @@ export default function Profile() {
 	// ---------------- UI ----------------
 
 	return (
-		<div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 p-6 md:p-10">
+		<div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 p-6 pb-28 md:p-10">
 			<div className="max-w-4xl mx-auto space-y-8">
 				{/* Header */}
 				<div className="flex items-center justify-between">
