@@ -11,6 +11,7 @@ import useChatSession from "../../../contexts/chat/ChatSession/useChatSession";
 import useSeenMessages from "../../../hooks/chat/useSeenMessages";
 import useToast from "../../../contexts/ui/useToast";
 import { getErrorMessage } from "../../../utilities/errors";
+import { formatSystemMessage } from "../../../utilities/systemMessages";
 
 export default function ChatContent() {
     const { token, currentUser } = useAuth();
@@ -84,13 +85,19 @@ export default function ChatContent() {
             <div className="p-3 flex flex-col gap-[2.5px] h-full" ref={messagesContainerRef}>
                 {activeChatMessages?.map((m, index) => {
                     if (m.type === "system") {
+                        const systemText = formatSystemMessage({
+                            message: m,
+                            currentUserId: currentUser?._id,
+                            participants: activeChatData?.participants || [],
+                        });
+
                         return (
                             <div
                                 key={m._id}
                                 data-message-id={m._id}
                                 className="text-center text-xs text-gray-500 dark:text-gray-400 mt-4"
                             >
-                                {m.text}
+                                {systemText}
                             </div>
                         );
                     }

@@ -45,8 +45,21 @@ const messageSchema = new mongoose.Schema(
 				"admin_added",
 				"admin_removed",
 				"nickname_update",
+				"chatname_update",
 				"chatname_updated",
 			],
+		},
+		initiator: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "User",
+		},
+		targetUser: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "User",
+		},
+		newValue: {
+			type: String,
+			default: "",
 		},
 		isSeen: {
 			type: Boolean,

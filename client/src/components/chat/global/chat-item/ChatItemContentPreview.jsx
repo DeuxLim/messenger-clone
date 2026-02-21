@@ -1,4 +1,6 @@
 
+import { formatSystemMessage } from "../../../../utilities/systemMessages";
+
 export default function ChatItemContentPreview({ data }) {
     const {
         typingChats,
@@ -9,7 +11,13 @@ export default function ChatItemContentPreview({ data }) {
         lastMessageDateTime
     } = data;
 
-    const unread = chatData?.type == "system" ?
+    const systemPreview = formatSystemMessage({
+        message: chatData?.lastMessage,
+        currentUserId: currentUser?._id,
+        participants: chatData?.participants || [],
+    });
+
+    const unread = chatData?.lastMessage?.type === "system" ?
         `${chatData?.unreadCount} chat updates` :
         (chatData?.unreadCount > 0) ?
             `${chatData?.lastMessage?.sender?.firstName} sent ${chatData?.unreadCount} message${chatData?.unreadCount > 1 ? "s" : ""}` : "";
@@ -32,6 +40,8 @@ export default function ChatItemContentPreview({ data }) {
                         <span className={`truncate flex-1 ${!isLastMsgSeen && chatData.lastMessage?.sender?._id !== currentUser._id ? "font-bold" : ""}`}>
                             {chatData.lastMessage?.status === "sending" ? (
                                 "sending..."
+                            ) : chatData.lastMessage?.type === "system" ? (
+                                systemPreview
                             ) : chatData.lastMessage?.sender?._id === currentUser._id ? (
                                 `you: ${chatData.lastMessage?.text || ""}`
                             ) : chatData.unreadCount > 0 && !isLastMsgSeen ? (

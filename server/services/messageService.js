@@ -11,6 +11,9 @@ export const addMessageToChat = async ({
 	media = [],
 	type = "user",
 	systemAction = "",
+	initiator = null,
+	targetUser = null,
+	newValue = "",
 }) => {
 	// Verify chat exists
 	const chat = await Chat.findById(chatId);
@@ -61,11 +64,11 @@ export const addMessageToChat = async ({
 		text,
 		media: uploadedFiles,
 		type,
+		systemAction: systemAction || undefined,
+		initiator: initiator || undefined,
+		targetUser: targetUser || undefined,
+		newValue: typeof newValue === "string" ? newValue : "",
 	});
-
-	if (systemAction) {
-		newMessage.systemAction = systemAction;
-	}
 
 	// Update chat's last message
 	await Chat.findByIdAndUpdate(chat._id, { lastMessage: newMessage._id });
@@ -215,6 +218,9 @@ export const updateChat = async ({
 			text,
 			type,
 			systemAction,
+			initiator,
+			targetUser,
+			newValue: typeof newValue === "string" ? newValue : "",
 		});
 
 		return systemMessage;
