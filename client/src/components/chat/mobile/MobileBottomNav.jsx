@@ -38,7 +38,7 @@ export default function MobileBottomNav() {
     if (!isAppReady || !shouldShowNav) return null;
 
     return (
-        <nav className="fixed bottom-0 inset-x-0 md:hidden z-50 border-t border-gray-200/90 dark:border-gray-700/80 bg-white/95 dark:bg-gray-900/95 backdrop-blur">
+        <nav className="fixed bottom-0 inset-x-0 md:hidden z-50 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
             <div className="relative flex items-center gap-1 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
                 <Link to="/chats" className={itemClass(isChatsPage)}>
                     <span className={iconWrapClass(isChatsPage)}>
@@ -81,7 +81,7 @@ export default function MobileBottomNav() {
                         id="mobile-bottom-menu"
                         ref={menuRef}
                         role="menu"
-                        className="absolute right-2 bottom-[calc(100%+0.5rem)] w-56 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 z-50 bg-white dark:bg-gray-900 p-2"
+                        className="absolute right-2 bottom-[calc(100%+0.5rem)] w-56 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 z-50 bg-white dark:bg-gray-950 p-2"
                     >
                         <div className="px-2 pb-2 text-xs text-gray-500 dark:text-gray-400 truncate">
                             {currentUser?.fullName}

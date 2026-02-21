@@ -71,7 +71,7 @@ export default function ChatApp() {
                     </div>
                 )}
             </div>
-            <div className={`flex h-full px-2 pt-4 ${!isDesktop && isMobileBottomNavRoute ? "pb-24" : "pb-4"} md:py-4 md:pb-4 bg-gray-100 dark:bg-gray-950 gap-4`}>
+            <div className={`relative flex h-full px-2 pt-4 ${!isDesktop && isMobileBottomNavRoute ? "pb-24" : "pb-4"} md:py-4 md:pb-4 bg-gray-100 dark:bg-gray-950 gap-4`}>
 
                 <IconMenu />
 

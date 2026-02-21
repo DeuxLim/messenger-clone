@@ -34,7 +34,7 @@ export default function ChatSettings() {
     const [isChatNameEditModalDisplayed, setIsChatNameEditModalDisplayed] = useToggle();
     const [isDeleteChatModalDisplayed, setIsDeleteChatModalDisplayed] = useToggle();
     const [chatName, setChatName] = useState(activeChatData?.chatName || "");
-    const { isChatSettingsOpen, setIsChatSettingsOpen } = useChatDisplay();
+    const { setIsChatSettingsOpen } = useChatDisplay();
     const [updatedNickname, setUpdatedNickname] = useState({});
     const [isDeletingChat, setIsDeletingChat] = useState(false);
     const { socket } = useSocket();
@@ -144,7 +144,7 @@ export default function ChatSettings() {
     };
 
     return (
-        <div className={`h-full shadow-sm overflow-hidden bg-white rounded-xl p-2 min-w-80 w-full ${isChatSettingsOpen ? "max-w-[400px]" : ""}`}>
+        <div className="h-full w-full rounded-xl shadow-sm overflow-y-auto bg-white dark:bg-gray-900 p-2 md:flex-none md:w-[clamp(260px,32vw,400px)]">
             <div className="flex justify-center items-center flex-col gap-4">
 
                 <div className='flex justify-center items-start w-full relative'>

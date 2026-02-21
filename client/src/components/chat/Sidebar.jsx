@@ -8,7 +8,7 @@ export default function Sidebar() {
     return (
         <>
             {/* SIDEBAR */}
-            <aside className="flex flex-col h-full rounded-xl bg-white dark:bg-gray-900 shadow-sm overflow-auto min-w-[250px] w-full md:max-w-[480px]">
+            <aside className="flex flex-col h-full rounded-xl bg-white dark:bg-gray-900 shadow-sm overflow-auto min-w-[250px] w-full md:flex-none md:w-[clamp(260px,34vw,480px)] xl:w-[480px]">
 
                 {/* HEADER */}
                 <SidebarHeader />
