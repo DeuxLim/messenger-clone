@@ -1,4 +1,4 @@
-# Ping Messenger (Messaging App)
+# Messenger Clone
 
 > This project was built independently from scratch. No step-by-step "messenger clone" tutorial was followed during development.
 
