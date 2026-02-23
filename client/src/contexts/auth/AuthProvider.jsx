@@ -60,7 +60,21 @@ export default function AuthProvider({ children }) {
         if (hasBootstrapped.current) return;
         hasBootstrapped.current = true;
 
-        refreshToken();
+        const bootstrapAuth = async () => {
+            try {
+                await fetchAPI.warmup({
+                    timeout: 25000,
+                    maxRetries: 2,
+                    retryDelayMs: 1500,
+                });
+            } catch {
+                // Warmup is best-effort. Refresh still decides final auth state.
+            }
+
+            await refreshToken();
+        };
+
+        bootstrapAuth();
     }, [refreshToken]);
 
     const value = {

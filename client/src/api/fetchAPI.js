@@ -4,6 +4,8 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 let authToken = null;
 let refreshPromise = null;
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function refreshAccessToken() {
 	if (!refreshPromise) {
 		refreshPromise = (async () => {
@@ -35,6 +37,11 @@ async function fetchClient(
 		headers = {},
 		timeout = 10000,
 		retry = true,
+		maxRetries = 0,
+		retryDelayMs = 1200,
+		retryOnTimeout = false,
+		retryOnNetworkError = false,
+		retryAttempt = 0,
 		...otherOptions
 	} = {},
 ) {
@@ -87,6 +94,11 @@ async function fetchClient(
 					headers,
 					timeout,
 					retry: false, // prevent infinite loop
+					maxRetries,
+					retryDelayMs,
+					retryOnTimeout,
+					retryOnNetworkError,
+					retryAttempt,
 					...otherOptions,
 				});
 			} catch (err) {
@@ -115,7 +127,44 @@ async function fetchClient(
 		}
 	} catch (error) {
 		if (error.name === "AbortError") {
+			if (retryOnTimeout && retryAttempt < maxRetries) {
+				const delay = retryDelayMs * (retryAttempt + 1);
+				await sleep(delay);
+				return fetchClient(endpoint, {
+					method,
+					body,
+					headers,
+					timeout,
+					retry,
+					maxRetries,
+					retryDelayMs,
+					retryOnTimeout,
+					retryOnNetworkError,
+					retryAttempt: retryAttempt + 1,
+					...otherOptions,
+				});
+			}
+
 			throw new Error("Request timeout");
+		}
+
+		const isNetworkError = error instanceof TypeError;
+		if (isNetworkError && retryOnNetworkError && retryAttempt < maxRetries) {
+			const delay = retryDelayMs * (retryAttempt + 1);
+			await sleep(delay);
+			return fetchClient(endpoint, {
+				method,
+				body,
+				headers,
+				timeout,
+				retry,
+				maxRetries,
+				retryDelayMs,
+				retryOnTimeout,
+				retryOnNetworkError,
+				retryAttempt: retryAttempt + 1,
+				...otherOptions,
+			});
 		}
 		console.error("Fetch error:", error.message);
 		throw error;
@@ -158,6 +207,14 @@ export const fetchAPI = {
 		fetchClient(endpoint, { ...options, method: "PATCH", body }),
 	delete: (endpoint, options = {}) =>
 		fetchClient(endpoint, { ...options, method: "DELETE" }),
+	warmup: (options = {}) =>
+		fetchClient("/welcome", {
+			...options,
+			method: "GET",
+			retry: false,
+			retryOnTimeout: true,
+			retryOnNetworkError: true,
+		}),
 
 	// Auth helpers
 	setAuth: setAuthToken,
