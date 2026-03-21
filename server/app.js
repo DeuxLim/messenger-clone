@@ -21,6 +21,8 @@ app.use(
 );
 
 app.use(express.json());
+
+// For forms
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
